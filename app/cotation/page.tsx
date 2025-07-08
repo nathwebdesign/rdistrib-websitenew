@@ -738,28 +738,44 @@ export default function CotationPage() {
                 <div className="space-y-4">
                   {/* Hayon */}
                   <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-3">Hayon</h4>
-                    <div className="space-y-2">
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="hayonEnlevement"
-                          checked={formData.hayonEnlevement}
-                          onChange={handleInputChange}
-                          className="mr-3"
-                        />
-                        <span className="text-sm">À l'enlèvement</span>
-                      </label>
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="hayonLivraison"
-                          checked={formData.hayonLivraison}
-                          onChange={handleInputChange}
-                          className="mr-3"
-                        />
-                        <span className="text-sm">À la livraison</span>
-                      </label>
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-gray-900">Hayon</h4>
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hayon"
+                            value="oui"
+                            checked={formData.hayonEnlevement || formData.hayonLivraison}
+                            onChange={(e) => {
+                              setFormData(prev => ({
+                                ...prev,
+                                hayonEnlevement: true,
+                                hayonLivraison: true
+                              }))
+                            }}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">Oui</span>
+                        </label>
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hayon"
+                            value="non"
+                            checked={!formData.hayonEnlevement && !formData.hayonLivraison}
+                            onChange={(e) => {
+                              setFormData(prev => ({
+                                ...prev,
+                                hayonEnlevement: false,
+                                hayonLivraison: false
+                              }))
+                            }}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">Non</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                   
