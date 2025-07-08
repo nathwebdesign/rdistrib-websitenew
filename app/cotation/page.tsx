@@ -221,7 +221,7 @@ export default function CotationPage() {
           weight,
           dimensions,
           options,
-          nombrePalettes: article.nombrePalettes ? parseInt(article.nombrePalettes) : undefined
+          nombrePalettes: article.type === 'palette' && article.nombrePalettes ? parseInt(article.nombrePalettes) : undefined
         })
 
         if (cotation.success && cotation.data) {
@@ -316,7 +316,7 @@ export default function CotationPage() {
         dimensionsMax.largeur = Math.max(dimensionsMax.largeur, parseFloat(article.largeur))
         dimensionsMax.hauteur = Math.max(dimensionsMax.hauteur, parseFloat(article.hauteur))
       }
-      if (article.type === 'palette' && article.nombrePalettes) {
+      if (article.nombrePalettes) {
         nombrePalettesTotal += parseInt(article.nombrePalettes)
       }
     })
@@ -694,37 +694,35 @@ export default function CotationPage() {
                         </div>
                       </div>
                       
-                      {article.type === 'palette' && (
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Nombre de palettes
-                            </label>
-                            <input
-                              type="number"
-                              value={article.nombrePalettes}
-                              onChange={(e) => handleArticleChange(article.id, 'nombrePalettes', e.target.value)}
-                              min="1"
-                              step="1"
-                              placeholder="1"
-                              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Gerbable
-                            </label>
-                            <select
-                              value={article.gerbable ? 'oui' : 'non'}
-                              onChange={(e) => handleArticleChange(article.id, 'gerbable', e.target.value === 'oui' ? 'true' : 'false')}
-                              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                            >
-                              <option value="oui">Oui</option>
-                              <option value="non">Non</option>
-                            </select>
-                          </div>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Nombre {article.type === 'palette' ? 'de palettes' : article.type === 'colis' ? 'de colis' : 'de tubes'}
+                          </label>
+                          <input
+                            type="number"
+                            value={article.nombrePalettes}
+                            onChange={(e) => handleArticleChange(article.id, 'nombrePalettes', e.target.value)}
+                            min="1"
+                            step="1"
+                            placeholder="1"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
                         </div>
-                      )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Gerbable
+                          </label>
+                          <select
+                            value={article.gerbable ? 'oui' : 'non'}
+                            onChange={(e) => handleArticleChange(article.id, 'gerbable', e.target.value === 'oui' ? 'true' : 'false')}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                          >
+                            <option value="oui">Oui</option>
+                            <option value="non">Non</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
