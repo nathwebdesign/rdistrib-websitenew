@@ -261,45 +261,43 @@ export default function CotationPage() {
     // Calculer le prix total avec options
     const pricing = calculateTotalPrice(prixTotalBase, options, poleId)
 
-    // Déterminer les options de livraison disponibles
-    const minimumPolePrice = getMinimumPriceForPole(poleId)
-    const isMessagerieOptionAvailable = prixTotalBase < minimumPolePrice
-    
-    // Si la messagerie est disponible, calculer aussi le prix en messagerie
+    // Toujours calculer le prix messagerie pour comparaison
     let prixMessagerieTotal = null
-    if (isMessagerieOptionAvailable) {
-      let resultatsMessagerieArticles: any[] = []
-      
-      articles.forEach((article, index) => {
-        if (article.poids && article.longueur && article.largeur && article.hauteur) {
-          const cotationMessagerie = calculateCotation({
-            poleId,
-            postalCodeDestination: codePostal,
-            weight: parseFloat(article.poids),
-            dimensions: {
-              longueur: parseFloat(article.longueur),
-              largeur: parseFloat(article.largeur),
-              hauteur: parseFloat(article.hauteur)
-            },
-            options: {
-              hayon: false,
-              attente: 0,
-              matieresDangereuses: false,
-              valeurMarchandise: 0
-            },
-            forceType: 'messagerie'
-          })
-          
-          if (cotationMessagerie.success && cotationMessagerie.data) {
-            resultatsMessagerieArticles.push(cotationMessagerie.data)
-          }
+    let resultatsMessagerieArticles: any[] = []
+    
+    articles.forEach((article, index) => {
+      if (article.poids && article.longueur && article.largeur && article.hauteur) {
+        const cotationMessagerie = calculateCotation({
+          poleId,
+          postalCodeDestination: codePostal,
+          weight: parseFloat(article.poids),
+          dimensions: {
+            longueur: parseFloat(article.longueur),
+            largeur: parseFloat(article.largeur),
+            hauteur: parseFloat(article.hauteur)
+          },
+          options: {
+            hayon: false,
+            attente: 0,
+            matieresDangereuses: false,
+            valeurMarchandise: 0
+          },
+          forceType: 'messagerie'
+        })
+        
+        if (cotationMessagerie.success && cotationMessagerie.data) {
+          resultatsMessagerieArticles.push(cotationMessagerie.data)
         }
-      })
-      
-      if (resultatsMessagerieArticles.length > 0) {
-        prixMessagerieTotal = resultatsMessagerieArticles.reduce((sum, r) => sum + r.pricing.basePrice, 0)
       }
+    })
+    
+    if (resultatsMessagerieArticles.length > 0) {
+      prixMessagerieTotal = resultatsMessagerieArticles.reduce((sum, r) => sum + r.pricing.basePrice, 0)
     }
+    
+    // La messagerie est disponible seulement si elle est au moins 1€ moins chère que l'affrètement
+    const isMessagerieOptionAvailable = prixMessagerieTotal !== null && 
+                                       prixMessagerieTotal < (prixTotalBase - 1)
 
     // Calculer le prix Express
     let prixExpressTotal = null
@@ -357,9 +355,11 @@ export default function CotationPage() {
         messagerie: {
           disponible: isMessagerieOptionAvailable,
           prix: prixMessagerieTotal,
-          message: isMessagerieOptionAvailable 
-            ? `Prix affrètement (${prixTotalBase}€) < ${minimumPolePrice}€`
-            : `Prix affrètement (${prixTotalBase}€) ≥ ${minimumPolePrice}€`
+          message: prixMessagerieTotal !== null
+            ? (isMessagerieOptionAvailable 
+                ? `Messagerie (${prixMessagerieTotal}€) est ${prixTotalBase - prixMessagerieTotal}€ moins chère que l'affrètement`
+                : `Messagerie (${prixMessagerieTotal}€) n'est pas assez économique (différence: ${prixMessagerieTotal - prixTotalBase}€)`)
+            : 'Messagerie non disponible pour cette configuration'
         },
         affretement: {
           disponible: true,
