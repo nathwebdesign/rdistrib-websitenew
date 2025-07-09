@@ -20,8 +20,6 @@ const poles: Record<string, [number, number]> = {
 }
 
 export default function CotationPage() {
-  const [typeTransport, setTypeTransport] = useState<'depuis-pole' | 'vers-pole'>('depuis-pole')
-  
   const [articles, setArticles] = useState([{
     id: 1,
     type: 'palette',  // palette, colis, tube
@@ -158,32 +156,43 @@ export default function CotationPage() {
       return
     }
     
-    // Déterminer le pôle sélectionné selon le mode de transport
-    const poleSelected = typeTransport === 'depuis-pole' ? formData.poleSelectionne || formData.villeDepart : formData.poleArriveeSelectionne || formData.villeArrivee
+    // Fonction pour détecter un pôle dans une adresse
+    const detectPole = (address: string): string => {
+      const addressLower = address.toLowerCase()
+      if (addressLower.includes('roissy') || addressLower.includes('cdg') || addressLower.includes('95700')) return 'roissy'
+      if (addressLower.includes('marseille') || addressLower.includes('13000')) return 'marseille'
+      if (addressLower.includes('lyon') || addressLower.includes('69000')) return 'lyon'
+      if (addressLower.includes('le havre') || addressLower.includes('havre') || addressLower.includes('76600')) return 'le-havre'
+      return ''
+    }
     
-    // Convertir le nom du pôle en ID interne
-    const poleId = poleSelected === 'Roissy CDG' ? 'roissy' : 
-                   poleSelected === 'Marseille' ? 'marseille' : 
-                   poleSelected === 'Lyon' ? 'lyon' : 
-                   poleSelected === 'Le Havre' ? 'le-havre' : ''
+    // Détecter les pôles dans les adresses
+    const poleDepartId = detectPole(formData.villeDepart)
+    const poleArriveeId = detectPole(formData.villeArrivee)
     
-    const hasAutomaticPricing = ['roissy', 'marseille', 'le-havre', 'lyon'].includes(poleId)
-    
-    // Tous les pôles ont maintenant une tarification automatique
-    if (!hasAutomaticPricing) {
-      setError('Erreur: pôle non reconnu')
+    // Vérifier qu'au moins une adresse contient un pôle
+    if (!poleDepartId && !poleArriveeId) {
+      setError('Aucun de nos pôles détecté dans les adresses. Veuillez nous contacter pour un devis personnalisé.')
+      setShowResult(false)
       return
     }
     
-    // Extraire le code postal de l'adresse de destination
-    let codePostal = formData.codePostalDestination
-    if (!codePostal) {
-      const addressToCheck = typeTransport === 'depuis-pole' ? formData.villeArrivee : formData.villeDepart
-      codePostal = extractPostalCode(addressToCheck)
+    // Déterminer quel pôle utiliser et quel code postal
+    let poleId = ''
+    let codePostal = ''
+    
+    if (poleDepartId) {
+      // Transport depuis un pôle
+      poleId = poleDepartId
+      codePostal = extractPostalCode(formData.villeArrivee)
+    } else {
+      // Transport vers un pôle
+      poleId = poleArriveeId
+      codePostal = extractPostalCode(formData.villeDepart)
     }
     
     if (!codePostal) {
-      setError('Veuillez saisir une ville valide ou un code postal')
+      setError('Veuillez saisir une adresse complète avec code postal')
       return
     }
 
@@ -350,7 +359,10 @@ export default function CotationPage() {
       zone: resultatsArticles[0].zone,
       details: resultatsArticles[0].details,
       trajet: `${formData.villeDepart} → ${formData.villeArrivee}`,
-      pole: poleSelected,
+      pole: poleId === 'roissy' ? 'Roissy CDG' : 
+            poleId === 'marseille' ? 'Marseille' : 
+            poleId === 'lyon' ? 'Lyon' : 
+            poleId === 'le-havre' ? 'Le Havre' : '',
       optionsLivraison: {
         messagerie: {
           disponible: isMessagerieOptionAvailable,
@@ -412,11 +424,16 @@ export default function CotationPage() {
           <p className="mt-4 text-lg leading-8 text-gray-600">
             Obtenez un devis instantané pour vos transports depuis/vers nos pôles
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
-            <AlertCircle className="h-5 w-5 text-blue-600" />
-            <span className="text-sm text-blue-800">
-              Tarifs en ligne disponibles pour tous nos pôles : Roissy CDG, Marseille, Le Havre et Lyon
-            </span>
+          <div className="mt-4 space-y-2">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
+              <AlertCircle className="h-5 w-5 text-blue-600" />
+              <span className="text-sm text-blue-800">
+                Tarifs en ligne disponibles depuis/vers nos pôles : Roissy CDG, Marseille, Le Havre et Lyon
+              </span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Pour les trajets ne passant pas par l'un de nos pôles, veuillez nous contacter directement.
+            </p>
           </div>
         </div>
 
@@ -430,134 +447,58 @@ export default function CotationPage() {
                   Trajet
                 </h3>
                 
-                <div className="flex gap-4 mb-6">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="typeTransport"
-                      value="depuis-pole"
-                      checked={typeTransport === 'depuis-pole'}
-                      onChange={(e) => {
-                        setTypeTransport(e.target.value as 'depuis-pole' | 'vers-pole')
-                        setFormData(prev => ({...prev, villeDepart: '', villeArrivee: '', codePostalDestination: '', poleSelectionne: '', poleArriveeSelectionne: '', nombrePalettes: ''}))
-                        setCoordinates({})
-                      }}
-                      className="mr-2"
-                    />
-                    <span className="text-sm font-medium">Départ depuis un pôle</span>
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="typeTransport"
-                      value="vers-pole"
-                      checked={typeTransport === 'vers-pole'}
-                      onChange={(e) => {
-                        setTypeTransport(e.target.value as 'depuis-pole' | 'vers-pole')
-                        setFormData(prev => ({...prev, villeDepart: '', villeArrivee: '', codePostalDestination: '', poleSelectionne: '', poleArriveeSelectionne: '', nombrePalettes: ''}))
-                        setCoordinates({})
-                      }}
-                      className="mr-2"
-                    />
-                    <span className="text-sm font-medium">Livraison vers un pôle</span>
-                  </label>
-                </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="villeDepart" className="block text-sm font-medium text-gray-700 mb-2">
-                      {typeTransport === 'depuis-pole' ? 'Pôle de départ' : 'Ville de départ'}
+                      Ville de départ
                     </label>
-                    {typeTransport === 'depuis-pole' ? (
-                      <select
-                        id="villeDepart"
-                        name="villeDepart"
-                        value={formData.villeDepart}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                        required
-                      >
-                        <option value="">Sélectionnez un pôle</option>
-                        <option value="Roissy CDG">Roissy CDG</option>
-                        <option value="Lyon">Lyon</option>
-                        <option value="Marseille">Marseille</option>
-                        <option value="Le Havre">Le Havre</option>
-                      </select>
-                    ) : (
-                      <AddressAutocomplete
-                        value={formData.villeDepart}
-                        onChange={(value, coords) => {
-                          // Extraire automatiquement le code postal
-                          const codePostal = extractPostalCode(value)
-                          setFormData(prev => ({
-                            ...prev, 
-                            villeDepart: value,
-                            // Si c'est une adresse de départ et qu'on est en mode "vers-pole", stocker le code postal
-                            ...(typeTransport === 'vers-pole' && codePostal ? { codePostalDestination: codePostal } : {})
-                          }))
-                          if (coords !== undefined) {
-                            setCoordinates(prev => ({...prev, depart: coords}))
-                          } else {
-                            // Si pas de coordonnées (utilisateur tape sans sélectionner), supprimer les coordonnées
-                            setCoordinates(prev => {
-                              const newCoords = {...prev}
-                              delete newCoords.depart
-                              return newCoords
-                            })
-                          }
-                        }}
-                        placeholder="Ex: Paris, Lyon, Marseille..."
-                        required
-                      />
-                    )}
+                    <AddressAutocomplete
+                      value={formData.villeDepart}
+                      onChange={(value, coords) => {
+                        setFormData(prev => ({
+                          ...prev, 
+                          villeDepart: value
+                        }))
+                        if (coords !== undefined) {
+                          setCoordinates(prev => ({...prev, depart: coords}))
+                        } else {
+                          setCoordinates(prev => {
+                            const newCoords = {...prev}
+                            delete newCoords.depart
+                            return newCoords
+                          })
+                        }
+                      }}
+                      placeholder="Ex: Paris, Lyon, Marseille..."
+                      required
+                    />
                   </div>
                   
                   <div>
                     <label htmlFor="villeArrivee" className="block text-sm font-medium text-gray-700 mb-2">
-                      {typeTransport === 'vers-pole' ? 'Pôle d\'arrivée' : 'Ville d\'arrivée'}
+                      Ville d'arrivée
                     </label>
-                    {typeTransport === 'vers-pole' ? (
-                      <select
-                        id="villeArrivee"
-                        name="villeArrivee"
-                        value={formData.villeArrivee}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                        required
-                      >
-                        <option value="">Sélectionnez un pôle</option>
-                        <option value="Roissy CDG">Roissy CDG</option>
-                        <option value="Lyon">Lyon</option>
-                        <option value="Marseille">Marseille</option>
-                        <option value="Le Havre">Le Havre</option>
-                      </select>
-                    ) : (
-                      <AddressAutocomplete
-                        value={formData.villeArrivee}
-                        onChange={(value, coords) => {
-                          // Extraire automatiquement le code postal
-                          const codePostal = extractPostalCode(value)
-                          setFormData(prev => ({
-                            ...prev, 
-                            villeArrivee: value,
-                            // Si c'est une adresse d'arrivée et qu'on est en mode "depuis-pole", stocker le code postal
-                            ...(typeTransport === 'depuis-pole' && codePostal ? { codePostalDestination: codePostal } : {})
-                          }))
-                          if (coords !== undefined) {
-                            setCoordinates(prev => ({...prev, arrivee: coords}))
-                          } else {
-                            // Si pas de coordonnées (utilisateur tape sans sélectionner), supprimer les coordonnées
-                            setCoordinates(prev => {
-                              const newCoords = {...prev}
-                              delete newCoords.arrivee
-                              return newCoords
-                            })
-                          }
-                        }}
-                        placeholder="Ex: Paris, Lyon, Marseille..."
-                        required
-                      />
-                    )}
+                    <AddressAutocomplete
+                      value={formData.villeArrivee}
+                      onChange={(value, coords) => {
+                        setFormData(prev => ({
+                          ...prev, 
+                          villeArrivee: value
+                        }))
+                        if (coords !== undefined) {
+                          setCoordinates(prev => ({...prev, arrivee: coords}))
+                        } else {
+                          setCoordinates(prev => {
+                            const newCoords = {...prev}
+                            delete newCoords.arrivee
+                            return newCoords
+                          })
+                        }
+                      }}
+                      placeholder="Ex: Lille, Nice, Bordeaux..."
+                      required
+                    />
                   </div>
                 </div>
 
