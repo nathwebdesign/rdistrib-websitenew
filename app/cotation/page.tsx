@@ -897,33 +897,47 @@ export default function CotationPage() {
                   <Truck className="h-4 w-4" />
                   Options de livraison disponibles
                 </h4>
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Messagerie */}
                   <button
                     onClick={() => resultat.optionsLivraison.messagerie.disponible && setSelectedDelivery('messagerie')}
                     disabled={!resultat.optionsLivraison.messagerie.disponible}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    className={`relative p-6 rounded-xl border-2 transition-all transform hover:scale-105 ${
                       selectedDelivery === 'messagerie'
-                        ? 'border-green-500 bg-green-100 ring-2 ring-green-500'
+                        ? 'border-green-500 bg-gradient-to-br from-green-50 to-green-100 shadow-lg scale-105'
                         : resultat.optionsLivraison.messagerie.disponible 
-                          ? 'border-green-200 bg-green-50 hover:border-green-300 hover:bg-green-100 cursor-pointer' 
+                          ? 'border-gray-200 bg-white hover:border-green-300 hover:shadow-md cursor-pointer' 
                           : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="font-medium text-gray-900">Messagerie</h5>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {resultat.optionsLivraison.messagerie.message}
-                        </p>
+                    {selectedDelivery === 'messagerie' && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                          Sélectionné
+                        </span>
                       </div>
-                      {resultat.optionsLivraison.messagerie.disponible && resultat.optionsLivraison.messagerie.prix && (
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-green-600">
+                    )}
+                    <div className="flex flex-col items-center text-center">
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedDelivery === 'messagerie' ? 'bg-green-500' : 'bg-green-100'
+                      }`}>
+                        <Package className={`h-8 w-8 ${
+                          selectedDelivery === 'messagerie' ? 'text-white' : 'text-green-600'
+                        }`} />
+                      </div>
+                      <h5 className="font-semibold text-gray-900 text-lg mb-1">Messagerie</h5>
+                      <p className="text-xs text-gray-600 mb-3 h-8">
+                        Petits colis et envois légers
+                      </p>
+                      {resultat.optionsLivraison.messagerie.disponible && resultat.optionsLivraison.messagerie.prix ? (
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">
                             {formatPrice(resultat.optionsLivraison.messagerie.prix)}
                           </p>
                           <p className="text-xs text-gray-500">HT</p>
                         </div>
+                      ) : (
+                        <p className="text-xs text-gray-500 italic">Non disponible</p>
                       )}
                     </div>
                   </button>
@@ -931,21 +945,33 @@ export default function CotationPage() {
                   {/* Affrètement */}
                   <button
                     onClick={() => setSelectedDelivery('affretement')}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    className={`relative p-6 rounded-xl border-2 transition-all transform hover:scale-105 ${
                       selectedDelivery === 'affretement'
-                        ? 'border-blue-500 bg-blue-100 ring-2 ring-blue-500'
-                        : 'border-blue-200 bg-blue-50 hover:border-blue-300 hover:bg-blue-100 cursor-pointer'
+                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg scale-105'
+                        : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md cursor-pointer'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="font-medium text-gray-900">Affrètement</h5>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Pour les palettes et colis volumineux
-                        </p>
+                    {selectedDelivery === 'affretement' && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span className="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                          Sélectionné
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-blue-600">
+                    )}
+                    <div className="flex flex-col items-center text-center">
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedDelivery === 'affretement' ? 'bg-blue-500' : 'bg-blue-100'
+                      }`}>
+                        <Truck className={`h-8 w-8 ${
+                          selectedDelivery === 'affretement' ? 'text-white' : 'text-blue-600'
+                        }`} />
+                      </div>
+                      <h5 className="font-semibold text-gray-900 text-lg mb-1">Affrètement</h5>
+                      <p className="text-xs text-gray-600 mb-3 h-8">
+                        Palettes et colis volumineux
+                      </p>
+                      <div>
+                        <p className="text-2xl font-bold text-blue-600">
                           {formatPrice(resultat.optionsLivraison.affretement.prix)}
                         </p>
                         <p className="text-xs text-gray-500">HT</p>
@@ -957,52 +983,47 @@ export default function CotationPage() {
                   <button
                     onClick={() => resultat.optionsLivraison.express.disponible && setSelectedDelivery('express')}
                     disabled={!resultat.optionsLivraison.express.disponible}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    className={`relative p-6 rounded-xl border-2 transition-all transform hover:scale-105 ${
                       selectedDelivery === 'express'
-                        ? 'border-orange-500 bg-orange-100 ring-2 ring-orange-500'
+                        ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg scale-105'
                         : resultat.optionsLivraison.express.disponible 
-                          ? 'border-orange-200 bg-orange-50 hover:border-orange-300 hover:bg-orange-100 cursor-pointer' 
+                          ? 'border-gray-200 bg-white hover:border-orange-300 hover:shadow-md cursor-pointer' 
                           : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="font-medium text-gray-900">Express</h5>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {resultat.optionsLivraison.express.message}
-                        </p>
+                    {selectedDelivery === 'express' && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                          Sélectionné
+                        </span>
                       </div>
-                      {resultat.optionsLivraison.express.disponible && resultat.optionsLivraison.express.prix && (
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-orange-600">
+                    )}
+                    <div className="flex flex-col items-center text-center">
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedDelivery === 'express' ? 'bg-orange-500' : 'bg-orange-100'
+                      }`}>
+                        <ClockIcon className={`h-8 w-8 ${
+                          selectedDelivery === 'express' ? 'text-white' : 'text-orange-600'
+                        }`} />
+                      </div>
+                      <h5 className="font-semibold text-gray-900 text-lg mb-1">Express</h5>
+                      <p className="text-xs text-gray-600 mb-3 h-8">
+                        {resultat.optionsLivraison.express.vehicule || 'Livraison urgente'}
+                      </p>
+                      {resultat.optionsLivraison.express.disponible && resultat.optionsLivraison.express.prix ? (
+                        <div>
+                          <p className="text-2xl font-bold text-orange-600">
                             {formatPrice(resultat.optionsLivraison.express.prix)}
                           </p>
                           <p className="text-xs text-gray-500">HT</p>
                         </div>
+                      ) : (
+                        <p className="text-xs text-gray-500 italic">Non disponible</p>
                       )}
                     </div>
                   </button>
                 </div>
                 
-                {/* Message d'instruction */}
-                {!selectedDelivery && (
-                  <p className="text-sm text-gray-600 text-center mt-3 italic">
-                    Cliquez sur une option de livraison pour la sélectionner
-                  </p>
-                )}
-                
-                {/* Affichage du choix sélectionné */}
-                {selectedDelivery && (
-                  <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                    <p className="text-sm font-medium text-primary text-center">
-                      Option sélectionnée : {
-                        selectedDelivery === 'messagerie' ? 'Messagerie' :
-                        selectedDelivery === 'affretement' ? 'Affrètement' :
-                        'Express'
-                      }
-                    </p>
-                  </div>
-                )}
               </div>
             )}
             
