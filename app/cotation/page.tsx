@@ -686,17 +686,33 @@ export default function CotationPage() {
                         </div>
                       </div>
                       
-                      {/* Option gerbable sur la même ligne */}
-                      <div className="flex items-center gap-3">
-                        <label className="flex items-center text-sm cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={article.gerbable}
-                            onChange={(e) => handleArticleChange(article.id, 'gerbable', e.target.checked ? 'true' : 'false')}
-                            className="mr-1.5"
-                          />
-                          <span className="text-xs text-gray-700">Gerbable</span>
-                        </label>
+                      {/* Option gerbable */}
+                      <div className="mt-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">📚 Gerbable</label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleArticleChange(article.id, 'gerbable', 'true')}
+                            className={`flex-1 py-1.5 px-3 text-sm font-medium rounded-md border-2 transition-colors ${
+                              article.gerbable 
+                                ? 'bg-green-500 text-white border-green-500' 
+                                : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                            }`}
+                          >
+                            Oui
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleArticleChange(article.id, 'gerbable', 'false')}
+                            className={`flex-1 py-1.5 px-3 text-sm font-medium rounded-md border-2 transition-colors ${
+                              !article.gerbable 
+                                ? 'bg-red-500 text-white border-red-500' 
+                                : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                            }`}
+                          >
+                            Non
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
