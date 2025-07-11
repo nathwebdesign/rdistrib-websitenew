@@ -202,7 +202,7 @@ export default function CotationPage() {
 
     // Regrouper les articles identiques (même type et dimensions)
     const articlesGroupes = new Map<string, {
-      articles: typeof articles,
+      articles: any[],
       totalPoids: number,
       totalPalettes: number,
       dimensions: { longueur: number, largeur: number, hauteur: number }
