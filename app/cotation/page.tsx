@@ -583,12 +583,12 @@ export default function CotationPage() {
                   </Button>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {articles.map((article, index) => (
-                    <div key={article.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50 relative">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                          <Box className="h-4 w-4" />
+                    <div key={article.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50 relative">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                          <Box className="h-3 w-3" />
                           Article {index + 1}
                         </h4>
                         {articles.length > 1 && (
@@ -597,22 +597,21 @@ export default function CotationPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeArticle(article.id)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-700 p-1"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4 mb-3">
+                      {/* Première ligne : Type, Poids, Dimensions */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Type d'article
-                          </label>
+                          <label className="block text-xs text-gray-600 mb-0.5">Type</label>
                           <select
                             value={article.type}
                             onChange={(e) => handleArticleChange(article.id, 'type', e.target.value)}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                           >
                             <option value="palette">Palette</option>
                             <option value="colis">Colis</option>
@@ -621,72 +620,60 @@ export default function CotationPage() {
                         </div>
                         
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Poids (kg)
-                          </label>
+                          <label className="block text-xs text-gray-600 mb-0.5">Poids kg</label>
                           <input
                             type="number"
                             value={article.poids}
                             onChange={(e) => handleArticleChange(article.id, 'poids', e.target.value)}
                             min="0.1"
                             step="0.1"
-                            placeholder="Ex: 500"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            placeholder="500"
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                             required
                           />
                         </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Longueur (cm)
-                          </label>
+                          <label className="block text-xs text-gray-600 mb-0.5">L cm</label>
                           <input
                             type="number"
                             value={article.longueur}
                             onChange={(e) => handleArticleChange(article.id, 'longueur', e.target.value)}
                             min="1"
                             placeholder="120"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                             required
                           />
                         </div>
+                        
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Largeur (cm)
-                          </label>
+                          <label className="block text-xs text-gray-600 mb-0.5">l cm</label>
                           <input
                             type="number"
                             value={article.largeur}
                             onChange={(e) => handleArticleChange(article.id, 'largeur', e.target.value)}
                             min="1"
                             placeholder="80"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                             required
                           />
                         </div>
+                        
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Hauteur (cm)
-                          </label>
+                          <label className="block text-xs text-gray-600 mb-0.5">H cm</label>
                           <input
                             type="number"
                             value={article.hauteur}
                             onChange={(e) => handleArticleChange(article.id, 'hauteur', e.target.value)}
                             min="1"
                             placeholder="100"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                             required
                           />
                         </div>
-                      </div>
-                      
-                      <div className="space-y-3">
+                        
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Nombre {article.type === 'palette' ? 'de palettes' : article.type === 'colis' ? 'de colis' : 'de tubes'}
-                          </label>
+                          <label className="block text-xs text-gray-600 mb-0.5">Qté</label>
                           <input
                             type="number"
                             value={article.nombrePalettes}
@@ -694,22 +681,22 @@ export default function CotationPage() {
                             min="1"
                             step="1"
                             placeholder="1"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                           />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Gerbable
-                          </label>
-                          <select
-                            value={article.gerbable ? 'oui' : 'non'}
-                            onChange={(e) => handleArticleChange(article.id, 'gerbable', e.target.value === 'oui' ? 'true' : 'false')}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                          >
-                            <option value="oui">Oui</option>
-                            <option value="non">Non</option>
-                          </select>
-                        </div>
+                      </div>
+                      
+                      {/* Option gerbable sur la même ligne */}
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center text-sm cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={article.gerbable}
+                            onChange={(e) => handleArticleChange(article.id, 'gerbable', e.target.checked ? 'true' : 'false')}
+                            className="mr-1.5"
+                          />
+                          <span className="text-xs text-gray-700">Gerbable</span>
+                        </label>
                       </div>
                     </div>
                   ))}
