@@ -607,11 +607,11 @@ export default function CotationPage() {
                       {/* Première ligne : Type, Poids, Dimensions */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2">
                         <div className="relative">
-                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-gray-100 px-2 py-0.5 rounded-t">📦 Type</label>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-purple-100 px-2 py-0.5 rounded-t">📦 Type</label>
                           <select
                             value={article.type}
                             onChange={(e) => handleArticleChange(article.id, 'type', e.target.value)}
-                            className="w-full rounded-b-md border-2 border-gray-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white"
+                            className="w-full rounded-b-md border-2 border-purple-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-purple-50"
                           >
                             <option value="palette">Palette</option>
                             <option value="colis">Colis</option>
