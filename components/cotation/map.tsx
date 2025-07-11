@@ -33,8 +33,8 @@ export default function Map({ depart, arrivee, departCoords, arriveeCoords, pole
           attributionControl: true
         })
         
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-          attribution: '© OpenStreetMap contributors © CARTO',
+        L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png", {
+          attribution: '© OpenStreetMap contributors © OpenStreetMap France',
           maxZoom: 19,
           minZoom: 3
         }).addTo(mapRef.current)
