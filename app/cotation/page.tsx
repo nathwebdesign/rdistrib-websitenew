@@ -201,12 +201,12 @@ export default function CotationPage() {
     let hayonNecessaire = false
 
     // Regrouper les articles identiques (même type et dimensions)
-    const articlesGroupes = new Map<string, {
+    const articlesGroupes: Record<string, {
       articles: any[],
       totalPoids: number,
       totalPalettes: number,
       dimensions: { longueur: number, largeur: number, hauteur: number }
-    }>()
+    }> = {}
 
     articles.forEach((article) => {
       if (article.poids && article.longueur && article.largeur && article.hauteur) {
@@ -226,16 +226,16 @@ export default function CotationPage() {
         // Créer une clé unique pour regrouper les articles identiques
         const key = `${article.type}-${dimensions.longueur}x${dimensions.largeur}x${dimensions.hauteur}`
         
-        if (!articlesGroupes.has(key)) {
-          articlesGroupes.set(key, {
+        if (!articlesGroupes[key]) {
+          articlesGroupes[key] = {
             articles: [],
             totalPoids: 0,
             totalPalettes: 0,
             dimensions
-          })
+          }
         }
         
-        const groupe = articlesGroupes.get(key)!
+        const groupe = articlesGroupes[key]
         groupe.articles.push(article)
         groupe.totalPoids += weight
         
@@ -247,7 +247,7 @@ export default function CotationPage() {
 
     // Calculer une seule cotation pour chaque groupe
     let numeroArticle = 1
-    for (const [key, groupe] of articlesGroupes) {
+    for (const [key, groupe] of Object.entries(articlesGroupes)) {
       const options = {
         hayon: false, // On appliquera le hayon sur le total
         attente: 0,
