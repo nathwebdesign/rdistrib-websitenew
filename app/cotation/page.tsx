@@ -40,7 +40,7 @@ export default function CotationPage() {
     // Options (automatisées ou manuelles)
     hayonEnlevement: false,
     hayonLivraison: false,
-    matieresDangereuses: false,
+    quantiteLimitee: false,
     kitADR: false,
     quantiteLimitee: false,
     rendezVousEnlevement: false,
@@ -201,7 +201,15 @@ export default function CotationPage() {
     let resultatsArticles: any[] = []
     let hayonNecessaire = false
 
-    articles.forEach((article, index) => {
+    // Regrouper les articles identiques (même type et dimensions)
+    const articlesGroupes = new Map<string, {
+      articles: typeof articles,
+      totalPoids: number,
+      totalPalettes: number,
+      dimensions: { longueur: number, largeur: number, hauteur: number }
+    }>()
+
+    articles.forEach((article) => {
       if (article.poids && article.longueur && article.largeur && article.hauteur) {
         const dimensions = {
           longueur: parseFloat(article.longueur) || 0,
@@ -216,50 +224,89 @@ export default function CotationPage() {
           hayonNecessaire = true
         }
 
-        // Calculer la cotation pour cet article
-        const options = {
-          hayon: false, // On appliquera le hayon sur le total
-          attente: 0,
-          matieresDangereuses: false, // On appliquera sur le total
-          valeurMarchandise: 0
+        // Créer une clé unique pour regrouper les articles identiques
+        const key = `${article.type}-${dimensions.longueur}x${dimensions.largeur}x${dimensions.hauteur}`
+        
+        if (!articlesGroupes.has(key)) {
+          articlesGroupes.set(key, {
+            articles: [],
+            totalPoids: 0,
+            totalPalettes: 0,
+            dimensions
+          })
         }
+        
+        const groupe = articlesGroupes.get(key)!
+        groupe.articles.push(article)
+        groupe.totalPoids += weight
+        
+        if (article.type === 'palette' && article.nombrePalettes) {
+          groupe.totalPalettes += parseInt(article.nombrePalettes)
+        }
+      }
+    })
 
-        const cotation = calculateCotation({
-          poleId,
-          postalCodeDestination: codePostal,
-          weight,
-          dimensions,
-          options,
-          nombrePalettes: article.type === 'palette' && article.nombrePalettes ? parseInt(article.nombrePalettes) : undefined
-        })
+    // Calculer une seule cotation pour chaque groupe
+    let numeroArticle = 1
+    for (const [key, groupe] of articlesGroupes) {
+      const options = {
+        hayon: false, // On appliquera le hayon sur le total
+        attente: 0,
+        quantiteLimitee: false, // On appliquera sur le total
+        valeurMarchandise: 0
+      }
 
-        if (cotation.success && cotation.data) {
+      // Pour les palettes, utiliser le nombre total de palettes du groupe
+      const cotation = calculateCotation({
+        poleId,
+        postalCodeDestination: codePostal,
+        weight: groupe.totalPoids,
+        dimensions: groupe.dimensions,
+        options,
+        nombrePalettes: groupe.totalPalettes > 0 ? groupe.totalPalettes : undefined
+      })
+
+      if (cotation.success && cotation.data) {
+        // Pour chaque article du groupe, ajouter les informations
+        groupe.articles.forEach((article) => {
           resultatsArticles.push({
             ...cotation.data,
             article: {
               id: article.id,
               type: article.type,
-              numero: index + 1,
-              gerbable: article.gerbable
+              numero: numeroArticle++,
+              gerbable: article.gerbable,
+              groupe: key,
+              totalGroupe: groupe.articles.length
             }
           })
-        }
+        })
       }
-    })
+    }
 
     if (resultatsArticles.length === 0) {
       setError('Erreur lors du calcul. Vérifiez que le code postal est dans notre zone de livraison.')
       return
     }
 
-    // Calculer le prix total
-    const prixTotalBase = resultatsArticles.reduce((sum, r) => sum + r.pricing.basePrice, 0)
+    // Calculer le prix total en évitant de compter plusieurs fois les groupes
+    const groupesPrixDejaCoptes = new Set<string>()
+    const prixTotalBase = resultatsArticles.reduce((sum, r) => {
+      if (r.article.groupe && r.article.totalGroupe > 1) {
+        // Si c'est un groupe, ne compter qu'une fois
+        if (groupesPrixDejaCoptes.has(r.article.groupe)) {
+          return sum // Prix déjà compté pour ce groupe
+        }
+        groupesPrixDejaCoptes.add(r.article.groupe)
+      }
+      return sum + r.pricing.basePrice
+    }, 0)
     
     // Appliquer les options sur le total
     const options = {
       hayon: hayonNecessaire || formData.hayonEnlevement || formData.hayonLivraison,
       attente: 0,
-      matieresDangereuses: formData.matieresDangereuses,
+      matieresDangereuses: false, // Quantité limitée ne rajoute rien
       valeurMarchandise: 0,
       hayonEnlevement: formData.hayonEnlevement,
       hayonLivraison: formData.hayonLivraison,
@@ -288,7 +335,7 @@ export default function CotationPage() {
           options: {
             hayon: false,
             attente: 0,
-            matieresDangereuses: false,
+            quantiteLimitee: false,
             valeurMarchandise: 0
           },
           forceType: 'messagerie'
@@ -334,7 +381,7 @@ export default function CotationPage() {
       distanceAllerRetour = estimateDistance(coordinates.depart, coordinates.arrivee)
       const prixExpress = calculateExpressPrice(distanceAllerRetour, vehiculeExpress, {
         hayon: formData.hayonEnlevement || formData.hayonLivraison,
-        matieresDangereuses: formData.matieresDangereuses,
+        matieresDangereuses: false, // Quantité limitée ne rajoute rien
         rendezVous: formData.rendezVousEnlevement || formData.rendezVousLivraison
       })
       prixExpressTotal = prixExpress.totalHT
@@ -727,12 +774,12 @@ export default function CotationPage() {
                       <label className="flex items-center cursor-pointer">
                         <input
                           type="checkbox"
-                          name="matieresDangereuses"
-                          checked={formData.matieresDangereuses}
+                          name="quantiteLimitee"
+                          checked={formData.quantiteLimitee}
                           onChange={handleInputChange}
                           className="mr-3"
                         />
-                        <span className="text-sm">Matières dangereuses</span>
+                        <span className="text-sm">Quantité limitée</span>
                       </label>
                       <label className="flex items-center cursor-pointer">
                         <input
@@ -828,16 +875,9 @@ export default function CotationPage() {
             
             {/* Informations zones tarifaires */}
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">Informations tarifaires</h4>
+              <h4 className="font-medium text-gray-900 mb-2">Zones tarifaires</h4>
               <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium">Tarifs en ligne disponibles pour tous nos pôles</p>
-                    <p className="text-xs mt-1">Calculez instantanément vos tarifs pour Roissy CDG, Marseille, Le Havre et Lyon.</p>
-                  </div>
-                </div>
-                <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="mt-3">
                   {formData.poleSelectionne === 'Roissy CDG' && (
                     <>
                       <p className="text-xs font-medium mb-1">Zones tarifaires Roissy :</p>
@@ -1040,9 +1080,17 @@ export default function CotationPage() {
                       <div className="flex justify-between items-start mb-2">
                         <h5 className="font-medium text-gray-900">
                           Article {item.article.numero} - {item.article.type.charAt(0).toUpperCase() + item.article.type.slice(1)}
+                          {item.article.totalGroupe > 1 && (
+                            <span className="text-sm text-gray-600 ml-2">
+                              (groupé avec {item.article.totalGroupe - 1} autre{item.article.totalGroupe > 2 ? 's' : ''})
+                            </span>
+                          )}
                         </h5>
                         <span className="text-sm font-semibold text-primary">
-                          {formatPrice(item.pricing.basePrice)}
+                          {item.article.totalGroupe > 1 
+                            ? `${formatPrice(item.pricing.basePrice / item.article.totalGroupe)} (${formatPrice(item.pricing.basePrice)} pour le groupe)`
+                            : formatPrice(item.pricing.basePrice)
+                          }
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
@@ -1149,6 +1197,7 @@ export default function CotationPage() {
                         {key === 'rendezVousLivraison' && 'Rendez-vous à la livraison'}
                         {key === 'attente' && 'Frais d\'attente'}
                         {key === 'matieresDangereuses' && 'Supplément matières dangereuses'}
+                        {key === 'quantiteLimitee' && 'Quantité limitée (sans supplément)'}
                         {key === 'assurance' && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Assurance</span>}
                       </span>
                       <span className="font-medium">{formatPrice(value as number)}</span>
