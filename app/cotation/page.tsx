@@ -290,14 +290,14 @@ export default function CotationPage() {
     }
 
     // Calculer le prix total en évitant de compter plusieurs fois les groupes
-    const groupesPrixDejaCoptes = new Set<string>()
+    const groupesPrixDejaComptes: string[] = []
     const prixTotalBase = resultatsArticles.reduce((sum, r) => {
       if (r.article.groupe && r.article.totalGroupe > 1) {
         // Si c'est un groupe, ne compter qu'une fois
-        if (groupesPrixDejaCoptes.has(r.article.groupe)) {
+        if (groupesPrixDejaComptes.includes(r.article.groupe)) {
           return sum // Prix déjà compté pour ce groupe
         }
-        groupesPrixDejaCoptes.add(r.article.groupe)
+        groupesPrixDejaComptes.push(r.article.groupe)
       }
       return sum + r.pricing.basePrice
     }, 0)
