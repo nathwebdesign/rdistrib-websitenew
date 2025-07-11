@@ -161,7 +161,8 @@ export function calculateTotalPrice(
     rendezVousEnlevement?: boolean;
     rendezVousLivraison?: boolean;
   },
-  poleId?: string // Ajout du pôle pour gérer les différences de tarifs
+  poleId?: string, // Ajout du pôle pour gérer les différences de tarifs
+  isParisRegionFarFromRoissy?: boolean // Pour le supplément région parisienne
 ): {
   basePrice: number;
   supplements: Record<string, number>;
@@ -239,6 +240,12 @@ export function calculateTotalPrice(
       supplements.assurance = Math.max(assuranceCalculee, optionsMessagerie.assurance.minimum);
     }
     totalHT += supplements.assurance;
+  }
+
+  // Supplément région parisienne > 20km de Roissy (affrètement uniquement)
+  if (isParisRegionFarFromRoissy) {
+    supplements.supplementRegionParisienne = 20;
+    totalHT += supplements.supplementRegionParisienne;
   }
 
   // Calcul TVA

@@ -29,6 +29,7 @@ export interface CotationInput {
   };
   nombrePalettes?: number; // Nombre de palettes fourni par l'utilisateur (optionnel)
   forceType?: 'messagerie' | 'affretement'; // Forcer le type de transport
+  destinationCoords?: [number, number]; // Coordonnées de destination pour calculer la distance
 }
 
 export interface CotationResult {
@@ -75,6 +76,19 @@ export interface CotationResult {
       conditionsSpeciales?: string[];
     };
   };
+}
+
+// Fonction pour calculer la distance entre deux points GPS (en km)
+function calculateDistance(coords1: [number, number], coords2: [number, number]): number {
+  const R = 6371; // Rayon de la Terre en km
+  const dLat = (coords2[0] - coords1[0]) * Math.PI / 180;
+  const dLon = (coords2[1] - coords1[1]) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(coords1[0] * Math.PI / 180) * Math.cos(coords2[0] * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
 }
 
 // Fonction principale de calcul de cotation
@@ -339,7 +353,26 @@ export function calculateCotation(input: CotationInput): CotationResult {
     }
 
     // 4. Calculer le prix total avec options
-    const pricing = calculateTotalPrice(basePrice, input.options, poleIdFormatted);
+    // Vérifier si c'est une livraison en région parisienne > 20km de Roissy
+    let isParisRegionFarFromRoissy = false;
+    if (poleIdFormatted === 'roissy' && typeTransport === 'metrePlancher') {
+      // Vérifier si c'est en région parisienne (départements 75, 77, 78, 91, 92, 93, 94, 95)
+      const department = getDepartmentFromPostalCode(input.postalCodeDestination);
+      const parisRegionDepts = ['75', '77', '78', '91', '92', '93', '94', '95'];
+      
+      if (parisRegionDepts.includes(department) && input.destinationCoords) {
+        // Coordonnées de Roissy CDG
+        const roissyCoords: [number, number] = [49.0097, 2.5479];
+        const distance = calculateDistance(roissyCoords, input.destinationCoords);
+        
+        // Si > 20km de Roissy, appliquer le supplément
+        if (distance > 20) {
+          isParisRegionFarFromRoissy = true;
+        }
+      }
+    }
+    
+    const pricing = calculateTotalPrice(basePrice, input.options, poleIdFormatted, isParisRegionFarFromRoissy);
 
     // 5. Déterminer le délai de livraison
     let delaiLivraison = '24-48h';

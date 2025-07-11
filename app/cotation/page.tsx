@@ -262,7 +262,8 @@ export default function CotationPage() {
         weight: groupe.totalPoids,
         dimensions: groupe.dimensions,
         options,
-        nombrePalettes: groupe.totalPalettes > 0 ? groupe.totalPalettes : undefined
+        nombrePalettes: groupe.totalPalettes > 0 ? groupe.totalPalettes : undefined,
+        destinationCoords: coordinates.arrivee
       })
 
       if (cotation.success && cotation.data) {
@@ -1181,6 +1182,7 @@ export default function CotationPage() {
                         {key === 'attente' && 'Frais d\'attente'}
                         {key === 'matieresDangereuses' && 'Supplément matières dangereuses'}
                         {key === 'quantiteLimitee' && 'Quantité limitée (sans supplément)'}
+                        {key === 'supplementRegionParisienne' && 'Supplément région parisienne (>20km de Roissy)'}
                         {key === 'assurance' && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Assurance</span>}
                       </span>
                       <span className="font-medium">{formatPrice(value as number)}</span>
