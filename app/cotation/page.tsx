@@ -604,21 +604,14 @@ export default function CotationPage() {
                         )}
                       </div>
                       
-                      {/* Info-bulle d'aide */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mb-2 text-xs text-blue-700">
-                        <span className="font-medium">📏 Dimensions:</span> Longueur x Largeur x Hauteur en centimètres • 
-                        <span className="font-medium ml-1">⚖️ Poids:</span> en kilogrammes • 
-                        <span className="font-medium ml-1">📦 Quantité:</span> nombre d'unités
-                      </div>
-                      
                       {/* Première ligne : Type, Poids, Dimensions */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-0.5">Type</label>
+                        <div className="relative">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-gray-100 px-2 py-0.5 rounded-t">📦 Type</label>
                           <select
                             value={article.type}
                             onChange={(e) => handleArticleChange(article.id, 'type', e.target.value)}
-                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-b-md border-2 border-gray-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                           >
                             <option value="palette">Palette</option>
                             <option value="colis">Colis</option>
@@ -626,8 +619,8 @@ export default function CotationPage() {
                           </select>
                         </div>
                         
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Poids (kg)</label>
+                        <div className="relative">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-blue-100 px-2 py-0.5 rounded-t">⚖️ Poids (kg)</label>
                           <input
                             type="number"
                             value={article.poids}
@@ -635,52 +628,52 @@ export default function CotationPage() {
                             min="0.1"
                             step="0.1"
                             placeholder="500"
-                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-b-md border-2 border-blue-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-blue-50"
                             required
                           />
                         </div>
                         
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Longueur (cm)</label>
+                        <div className="relative">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-green-100 px-2 py-0.5 rounded-t">↔️ Long. (cm)</label>
                           <input
                             type="number"
                             value={article.longueur}
                             onChange={(e) => handleArticleChange(article.id, 'longueur', e.target.value)}
                             min="1"
                             placeholder="120"
-                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-b-md border-2 border-green-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-green-50"
                             required
                           />
                         </div>
                         
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Largeur (cm)</label>
+                        <div className="relative">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-green-100 px-2 py-0.5 rounded-t">↕️ Larg. (cm)</label>
                           <input
                             type="number"
                             value={article.largeur}
                             onChange={(e) => handleArticleChange(article.id, 'largeur', e.target.value)}
                             min="1"
                             placeholder="80"
-                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-b-md border-2 border-green-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-green-50"
                             required
                           />
                         </div>
                         
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Hauteur (cm)</label>
+                        <div className="relative">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-green-100 px-2 py-0.5 rounded-t">📏 Haut. (cm)</label>
                           <input
                             type="number"
                             value={article.hauteur}
                             onChange={(e) => handleArticleChange(article.id, 'hauteur', e.target.value)}
                             min="1"
                             placeholder="100"
-                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-b-md border-2 border-green-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-green-50"
                             required
                           />
                         </div>
                         
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Quantité</label>
+                        <div className="relative">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-orange-100 px-2 py-0.5 rounded-t">🔢 Quantité</label>
                           <input
                             type="number"
                             value={article.nombrePalettes}
@@ -688,7 +681,7 @@ export default function CotationPage() {
                             min="1"
                             step="1"
                             placeholder="1"
-                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-b-md border-2 border-orange-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-orange-50"
                           />
                         </div>
                       </div>
