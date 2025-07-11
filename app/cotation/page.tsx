@@ -784,16 +784,6 @@ export default function CotationPage() {
                         />
                         <span className="text-sm">Kit ADR demandé</span>
                       </label>
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="quantiteLimitee"
-                          checked={formData.quantiteLimitee}
-                          onChange={handleInputChange}
-                          className="mr-3"
-                        />
-                        <span className="text-sm">Quantité Limitée</span>
-                      </label>
                     </div>
                   </div>
                   
