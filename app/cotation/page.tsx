@@ -42,7 +42,6 @@ export default function CotationPage() {
     hayonLivraison: false,
     quantiteLimitee: false,
     kitADR: false,
-    quantiteLimitee: false,
     rendezVousEnlevement: false,
     rendezVousLivraison: false
   })
@@ -604,6 +603,13 @@ export default function CotationPage() {
                         )}
                       </div>
                       
+                      {/* Info-bulle d'aide */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mb-2 text-xs text-blue-700">
+                        <span className="font-medium">📏 Dimensions:</span> Longueur x Largeur x Hauteur en centimètres • 
+                        <span className="font-medium ml-1">⚖️ Poids:</span> en kilogrammes • 
+                        <span className="font-medium ml-1">📦 Quantité:</span> nombre d'unités
+                      </div>
+                      
                       {/* Première ligne : Type, Poids, Dimensions */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2">
                         <div>
@@ -620,7 +626,7 @@ export default function CotationPage() {
                         </div>
                         
                         <div>
-                          <label className="block text-xs text-gray-600 mb-0.5">Poids kg</label>
+                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Poids (kg)</label>
                           <input
                             type="number"
                             value={article.poids}
@@ -634,7 +640,7 @@ export default function CotationPage() {
                         </div>
                         
                         <div>
-                          <label className="block text-xs text-gray-600 mb-0.5">L cm</label>
+                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Longueur (cm)</label>
                           <input
                             type="number"
                             value={article.longueur}
@@ -647,7 +653,7 @@ export default function CotationPage() {
                         </div>
                         
                         <div>
-                          <label className="block text-xs text-gray-600 mb-0.5">l cm</label>
+                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Largeur (cm)</label>
                           <input
                             type="number"
                             value={article.largeur}
@@ -660,7 +666,7 @@ export default function CotationPage() {
                         </div>
                         
                         <div>
-                          <label className="block text-xs text-gray-600 mb-0.5">H cm</label>
+                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Hauteur (cm)</label>
                           <input
                             type="number"
                             value={article.hauteur}
@@ -673,7 +679,7 @@ export default function CotationPage() {
                         </div>
                         
                         <div>
-                          <label className="block text-xs text-gray-600 mb-0.5">Qté</label>
+                          <label className="block text-xs text-gray-600 mb-0.5 font-medium">Quantité</label>
                           <input
                             type="number"
                             value={article.nombrePalettes}
