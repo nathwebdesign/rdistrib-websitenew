@@ -263,7 +263,7 @@ export default function CotationPage() {
         dimensions: groupe.dimensions,
         options,
         nombrePalettes: groupe.totalPalettes > 0 ? groupe.totalPalettes : undefined,
-        destinationCoords: coordinates.arrivee
+        destinationCoords: coordinates.arrivee || undefined
       })
 
       if (cotation.success && cotation.data) {
@@ -338,7 +338,8 @@ export default function CotationPage() {
             quantiteLimitee: false,
             valeurMarchandise: 0
           },
-          forceType: 'messagerie'
+          forceType: 'messagerie',
+          destinationCoords: coordinates.arrivee || undefined
         })
         
         if (cotationMessagerie.success && cotationMessagerie.data) {
