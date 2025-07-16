@@ -125,6 +125,15 @@ export function selectExpressVehicle(
   return null;
 }
 
+// Tarifs minimums pour les trajets < 150km
+const TARIFS_MINIMUMS_EXPRESS: Record<string, number> = {
+  'break': 150,
+  'fourgon': 210,
+  'gv20m3': 270,
+  'porteur': 390,
+  'semi': 570
+};
+
 // Fonction pour calculer le prix Express
 export function calculateExpressPrice(
   distanceAllerRetour: number,
@@ -142,7 +151,13 @@ export function calculateExpressPrice(
   totalTTC: number;
 } {
   // Prix de base = distance × coefficient
-  const basePrice = distanceAllerRetour * vehicule.coefficient;
+  let basePrice = distanceAllerRetour * vehicule.coefficient;
+  
+  // Appliquer le tarif minimum si distance < 150km
+  if (distanceAllerRetour < 150) {
+    const tarifMinimum = TARIFS_MINIMUMS_EXPRESS[vehicule.type] || 0;
+    basePrice = Math.max(basePrice, tarifMinimum);
+  }
   
   const supplements: Record<string, number> = {};
   let totalHT = basePrice;
