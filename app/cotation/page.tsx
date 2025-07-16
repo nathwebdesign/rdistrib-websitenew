@@ -336,7 +336,7 @@ export default function CotationPage() {
     const options = {
       hayon: hayonNecessaire || formData.hayonEnlevement || formData.hayonLivraison,
       attente: 0,
-      matieresDangereuses: false, // Quantité limitée ne rajoute rien
+      matieresDangereuses: formData.kitADR, // Kit ADR ajoute 25%
       valeurMarchandise: 0,
       hayonEnlevement: formData.hayonEnlevement,
       hayonLivraison: formData.hayonLivraison,
@@ -384,7 +384,7 @@ export default function CotationPage() {
     
     // La messagerie est disponible seulement si elle est au moins 1€ moins chère que l'affrètement
     const isMessagerieOptionAvailable = prixMessagerieTotal !== null && 
-                                       prixMessagerieTotal < (prixTotalBase - 1)
+                                       prixMessagerieTotal < (pricing.totalHT - 1)
 
     // Calculer le prix Express
     let prixExpressTotal = null
@@ -412,7 +412,7 @@ export default function CotationPage() {
       distanceAllerRetour = estimateDistance(coordinates.depart, coordinates.arrivee)
       const prixExpress = calculateExpressPrice(distanceAllerRetour, vehiculeExpress, {
         hayon: formData.hayonEnlevement || formData.hayonLivraison,
-        matieresDangereuses: false, // Quantité limitée ne rajoute rien
+        matieresDangereuses: formData.kitADR, // Kit ADR ajoute 25%
         rendezVous: formData.rendezVousEnlevement || formData.rendezVousLivraison
       })
       prixExpressTotal = prixExpress.totalHT
@@ -447,13 +447,13 @@ export default function CotationPage() {
           prix: prixMessagerieTotal,
           message: prixMessagerieTotal !== null
             ? (isMessagerieOptionAvailable 
-                ? `Messagerie (${prixMessagerieTotal}€) est ${prixTotalBase - prixMessagerieTotal}€ moins chère que l'affrètement`
-                : `Messagerie (${prixMessagerieTotal}€) n'est pas assez économique (différence: ${prixMessagerieTotal - prixTotalBase}€)`)
+                ? `Messagerie (${prixMessagerieTotal}€) est ${pricing.totalHT - prixMessagerieTotal}€ moins chère que l'affrètement`
+                : `Messagerie (${prixMessagerieTotal}€) n'est pas assez économique (différence: ${prixMessagerieTotal - pricing.totalHT}€)`)
             : 'Messagerie non disponible pour cette configuration'
         },
         affretement: {
           disponible: true,
-          prix: prixTotalBase
+          prix: pricing.totalHT
         },
         express: {
           disponible: vehiculeExpress !== null,
@@ -1220,7 +1220,7 @@ export default function CotationPage() {
                         {key === 'rendezVousEnlevement' && 'Rendez-vous à l\'enlèvement'}
                         {key === 'rendezVousLivraison' && 'Rendez-vous à la livraison'}
                         {key === 'attente' && 'Frais d\'attente'}
-                        {key === 'matieresDangereuses' && 'Supplément matières dangereuses'}
+                        {key === 'matieresDangereuses' && 'Kit ADR (+25%)'}
                         {key === 'quantiteLimitee' && 'Quantité limitée (sans supplément)'}
                         {key === 'supplementRegionParisienne' && 'Supplément région parisienne (>20km de Roissy)'}
                         {key === 'assurance' && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Assurance</span>}
