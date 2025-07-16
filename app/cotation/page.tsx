@@ -224,14 +224,42 @@ export default function CotationPage() {
         }
 
         // Créer une clé unique pour regrouper les articles identiques
-        const key = `${article.type}-${dimensions.longueur}x${dimensions.largeur}x${dimensions.hauteur}`
+        // Pour les palettes, on regroupe par type de palette (80x120 ou 100x120)
+        let key = ''
+        if (article.type === 'palette') {
+          // Déterminer le type de palette basé sur les dimensions
+          const estPalette80x120 = (dimensions.longueur === 80 && dimensions.largeur === 120) || 
+                                   (dimensions.longueur === 120 && dimensions.largeur === 80)
+          const estPalette100x120 = (dimensions.longueur === 100 && dimensions.largeur === 120) || 
+                                    (dimensions.longueur === 120 && dimensions.largeur === 100)
+          
+          if (estPalette80x120) {
+            key = 'palette-80x120'
+          } else if (estPalette100x120) {
+            key = 'palette-100x120'
+          } else {
+            // Palette de dimension non standard
+            key = `palette-${dimensions.longueur}x${dimensions.largeur}`
+          }
+        } else {
+          // Pour les autres types, on garde le regroupement par dimensions exactes
+          key = `${article.type}-${dimensions.longueur}x${dimensions.largeur}x${dimensions.hauteur}`
+        }
         
         if (!articlesGroupes[key]) {
+          // Pour les palettes standards, utiliser les dimensions standards
+          let groupDimensions = dimensions
+          if (key === 'palette-80x120') {
+            groupDimensions = { longueur: 120, largeur: 80, hauteur: dimensions.hauteur }
+          } else if (key === 'palette-100x120') {
+            groupDimensions = { longueur: 120, largeur: 100, hauteur: dimensions.hauteur }
+          }
+          
           articlesGroupes[key] = {
             articles: [],
             totalPoids: 0,
             totalPalettes: 0,
-            dimensions
+            dimensions: groupDimensions
           }
         }
         
@@ -239,8 +267,10 @@ export default function CotationPage() {
         groupe.articles.push(article)
         groupe.totalPoids += weight
         
-        if (article.type === 'palette' && article.nombrePalettes) {
-          groupe.totalPalettes += parseInt(article.nombrePalettes)
+        if (article.type === 'palette') {
+          // Si nombre de palettes spécifié, l'utiliser, sinon compter 1
+          const nbPalettes = article.nombrePalettes ? parseInt(article.nombrePalettes) : 1
+          groupe.totalPalettes += nbPalettes
         }
       }
     })
