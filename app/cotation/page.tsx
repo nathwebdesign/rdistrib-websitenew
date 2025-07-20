@@ -664,7 +664,7 @@ export default function CotationPage() {
                           <select
                             value={article.type}
                             onChange={(e) => handleArticleChange(article.id, 'type', e.target.value)}
-                            className="w-full rounded-b-md border-2 border-purple-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-purple-50"
+                            className="w-full rounded-b-md border-2 border-purple-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-purple-50 h-[34px]"
                           >
                             <option value="palette">Palette</option>
                             <option value="colis">Colis</option>
