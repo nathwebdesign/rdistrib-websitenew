@@ -134,6 +134,9 @@ const TARIFS_MINIMUMS_EXPRESS: Record<string, number> = {
   'semi': 570
 };
 
+// Import des zones Express RP
+import { getZoneExpressRP, getTarifExpressRP, isVilleExpressRP } from './zones-express-rp';
+
 // Fonction pour calculer le prix Express
 export function calculateExpressPrice(
   distanceAllerRetour: number,
@@ -142,6 +145,7 @@ export function calculateExpressPrice(
     hayon?: boolean;
     matieresDangereuses?: boolean;
     rendezVous?: boolean;
+    villeDestination?: string; // Nom de la ville pour l'Express RP
   }
 ): {
   basePrice: number;
@@ -150,13 +154,27 @@ export function calculateExpressPrice(
   tva: number;
   totalTTC: number;
 } {
-  // Prix de base = distance × coefficient
-  let basePrice = distanceAllerRetour * vehicule.coefficient;
+  let basePrice: number;
   
-  // Appliquer le tarif minimum si distance < 150km
-  if (distanceAllerRetour < 150) {
-    const tarifMinimum = TARIFS_MINIMUMS_EXPRESS[vehicule.type] || 0;
-    basePrice = Math.max(basePrice, tarifMinimum);
+  // Vérifier si c'est une ville Express RP avec zones A/B/C/D
+  if (options?.villeDestination && isVilleExpressRP(options.villeDestination)) {
+    const zone = getZoneExpressRP(options.villeDestination);
+    if (zone) {
+      const tarifZone = getTarifExpressRP(vehicule.type, zone);
+      basePrice = tarifZone || 0;
+    } else {
+      // Fallback au calcul kilométrique
+      basePrice = distanceAllerRetour * vehicule.coefficient;
+    }
+  } else {
+    // Calcul classique : Prix de base = distance × coefficient
+    basePrice = distanceAllerRetour * vehicule.coefficient;
+    
+    // Appliquer le tarif minimum si distance < 150km
+    if (distanceAllerRetour < 150) {
+      const tarifMinimum = TARIFS_MINIMUMS_EXPRESS[vehicule.type] || 0;
+      basePrice = Math.max(basePrice, tarifMinimum);
+    }
   }
   
   const supplements: Record<string, number> = {};

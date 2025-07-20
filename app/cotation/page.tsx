@@ -8,6 +8,7 @@ import { calculateCotation, estimatePalettes, determineTransportType, getMinimum
 import { getDepartmentFromPostalCode } from "@/config/zones"
 import { calculateTotalPrice } from "@/config/tarifs-manager"
 import { selectExpressVehicle, calculateExpressPrice, estimateDistance } from "@/config/tarifs-express"
+import { getZoneExpressRP, isVilleExpressRP } from "@/config/zones-express-rp"
 
 const Map = dynamic(() => import("@/components/cotation/map"), { ssr: false })
 const AddressAutocomplete = dynamic(() => import("@/components/cotation/address-autocomplete-free"), { ssr: false })
@@ -413,7 +414,8 @@ export default function CotationPage() {
       const prixExpress = calculateExpressPrice(distanceAllerRetour, vehiculeExpress, {
         hayon: formData.hayonEnlevement || formData.hayonLivraison,
         matieresDangereuses: formData.kitADR, // Kit ADR ajoute 25%
-        rendezVous: formData.rendezVousEnlevement || formData.rendezVousLivraison
+        rendezVous: formData.rendezVousEnlevement || formData.rendezVousLivraison,
+        villeDestination: formData.villeArrivee // Passer le nom de la ville pour les zones A/B/C/D
       })
       prixExpressTotal = prixExpress.totalHT
       pricingExpress = prixExpress
@@ -461,7 +463,14 @@ export default function CotationPage() {
           vehicule: vehiculeExpress?.nom,
           distance: distanceAllerRetour,
           message: vehiculeExpress 
-            ? `${vehiculeExpress.nom} (${vehiculeExpress.capacite.descriptionCapacite || `max ${vehiculeExpress.capacite.poidsMax}kg`}) - ${distanceAllerRetour} km A/R × ${vehiculeExpress.coefficient}€/km`
+            ? (() => {
+                const zone = isVilleExpressRP(formData.villeArrivee) ? getZoneExpressRP(formData.villeArrivee) : null;
+                if (zone) {
+                  return `${vehiculeExpress.nom} (${vehiculeExpress.capacite.descriptionCapacite || `max ${vehiculeExpress.capacite.poidsMax}kg`}) - Zone ${zone}`;
+                } else {
+                  return `${vehiculeExpress.nom} (${vehiculeExpress.capacite.descriptionCapacite || `max ${vehiculeExpress.capacite.poidsMax}kg`}) - ${distanceAllerRetour} km A/R × ${vehiculeExpress.coefficient}€/km`;
+                }
+              })()
             : 'Dimensions ou poids trop importants pour l\'Express'
         }
       }
@@ -635,8 +644,21 @@ export default function CotationPage() {
                         )}
                       </div>
                       
-                      {/* Première ligne : Type, Poids, Dimensions */}
+                      {/* Première ligne : Quantité, Type, Poids, Dimensions */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2">
+                        <div className="relative">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-orange-100 px-2 py-0.5 rounded-t">🔢 Quantité</label>
+                          <input
+                            type="number"
+                            value={article.nombrePalettes}
+                            onChange={(e) => handleArticleChange(article.id, 'nombrePalettes', e.target.value)}
+                            min="1"
+                            step="1"
+                            placeholder="1"
+                            className="w-full rounded-b-md border-2 border-orange-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-orange-50"
+                          />
+                        </div>
+                        
                         <div className="relative">
                           <label className="block text-xs font-semibold text-gray-700 mb-1 bg-purple-100 px-2 py-0.5 rounded-t">📦 Type</label>
                           <select
@@ -700,19 +722,6 @@ export default function CotationPage() {
                             placeholder="100"
                             className="w-full rounded-b-md border-2 border-green-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-green-50"
                             required
-                          />
-                        </div>
-                        
-                        <div className="relative">
-                          <label className="block text-xs font-semibold text-gray-700 mb-1 bg-orange-100 px-2 py-0.5 rounded-t">🔢 Quantité</label>
-                          <input
-                            type="number"
-                            value={article.nombrePalettes}
-                            onChange={(e) => handleArticleChange(article.id, 'nombrePalettes', e.target.value)}
-                            min="1"
-                            step="1"
-                            placeholder="1"
-                            className="w-full rounded-b-md border-2 border-orange-300 px-2 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-orange-50"
                           />
                         </div>
                       </div>
@@ -1118,14 +1127,6 @@ export default function CotationPage() {
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <span className="text-gray-600">Type de transport:</span>
-                          <span className="ml-2 font-medium">{item.transport.type}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Poids:</span>
-                          <span className="ml-2 font-medium">{item.transport.weight} kg</span>
-                        </div>
                         {item.transport.quantity && (
                           <div>
                             <span className="text-gray-600">Quantité:</span>
@@ -1137,6 +1138,14 @@ export default function CotationPage() {
                             </span>
                           </div>
                         )}
+                        <div>
+                          <span className="text-gray-600">Type de transport:</span>
+                          <span className="ml-2 font-medium">{item.transport.type}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Poids:</span>
+                          <span className="ml-2 font-medium">{item.transport.weight} kg</span>
+                        </div>
                         {item.article.type === 'palette' && (
                           <div>
                             <span className="text-gray-600">Gerbable:</span>
@@ -1211,23 +1220,29 @@ export default function CotationPage() {
                     <span className="font-medium">{formatPrice(getSelectedPrice()?.basePrice || 0)}</span>
                   </div>
                   
-                  {Object.entries(getSelectedPrice()?.supplements || {}).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="text-gray-600">
-                        {key === 'hayon' && 'Forfait hayon'}
-                        {key === 'hayonEnlevement' && 'Hayon à l\'enlèvement'}
-                        {key === 'hayonLivraison' && 'Hayon à la livraison'}
-                        {key === 'rendezVousEnlevement' && 'Rendez-vous à l\'enlèvement'}
-                        {key === 'rendezVousLivraison' && 'Rendez-vous à la livraison'}
-                        {key === 'attente' && 'Frais d\'attente'}
-                        {key === 'matieresDangereuses' && 'Kit ADR (+25%)'}
-                        {key === 'quantiteLimitee' && 'Quantité limitée (sans supplément)'}
-                        {key === 'supplementRegionParisienne' && 'Supplément région parisienne (>20km de Roissy)'}
-                        {key === 'assurance' && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Assurance</span>}
-                      </span>
-                      <span className="font-medium">{formatPrice(value as number)}</span>
-                    </div>
-                  ))}
+                  {Object.entries(getSelectedPrice()?.supplements || {}).map(([key, value]) => {
+                    // Ne pas afficher les détails du hayon, seulement le forfait
+                    if (key === 'Hayon à l\'enlèvement' || key === 'Hayon à la livraison') {
+                      return null;
+                    }
+                    
+                    return (
+                      <div key={key} className="flex justify-between">
+                        <span className="text-gray-600">
+                          {key === 'hayon' && 'Forfait hayon'}
+                          {key === 'Forfait hayon' && 'Forfait hayon'}
+                          {key === 'rendezVousEnlevement' && 'Rendez-vous à l\'enlèvement'}
+                          {key === 'rendezVousLivraison' && 'Rendez-vous à la livraison'}
+                          {key === 'attente' && 'Frais d\'attente'}
+                          {key === 'matieresDangereuses' && 'Kit ADR (+25%)'}
+                          {key === 'quantiteLimitee' && 'Quantité limitée (sans supplément)'}
+                          {key === 'supplementRegionParisienne' && 'Supplément région parisienne (>20km de Roissy)'}
+                          {key === 'assurance' && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Assurance</span>}
+                        </span>
+                        <span className="font-medium">{formatPrice(value as number)}</span>
+                      </div>
+                    );
+                  })}
                   
                   <div className="pt-3 border-t border-gray-300">
                     <div className="flex justify-between">

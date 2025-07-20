@@ -178,26 +178,22 @@ export function calculateTotalPrice(
   const supplements: Record<string, number> = {};
   let totalHT = basePrice;
 
-  // Forfait hayon (ancienne méthode)
-  if (options.hayon) {
+  // Forfait hayon - Un seul forfait de 30€ peu importe le nombre de hayons
+  if (options.hayon || options.hayonEnlevement || options.hayonLivraison) {
     // Utiliser le tarif spécifique de Roissy si applicable
     const hayonPrice = poleId === 'roissy' ? optionsTarifairesRoissy.forfaitHayon : supplementOptions.hayon;
-    supplements.hayon = hayonPrice;
-    totalHT += supplements.hayon;
-  }
-
-  // Hayon à l'enlèvement (30€ pour messagerie selon la grille)
-  if (options.hayonEnlevement) {
-    const hayonPrice = poleId === 'roissy' ? optionsTarifairesRoissy.forfaitHayon : optionsMessagerie.hayon;
-    supplements.hayonEnlevement = hayonPrice;
-    totalHT += supplements.hayonEnlevement;
-  }
-
-  // Hayon à la livraison (30€ pour messagerie selon la grille)
-  if (options.hayonLivraison) {
-    const hayonPrice = poleId === 'roissy' ? optionsTarifairesRoissy.forfaitHayon : optionsMessagerie.hayon;
-    supplements.hayonLivraison = hayonPrice;
-    totalHT += supplements.hayonLivraison;
+    
+    // Un seul forfait hayon, peu importe si c'est à l'enlèvement, à la livraison ou les deux
+    supplements['Forfait hayon'] = hayonPrice;
+    totalHT += hayonPrice;
+    
+    // Détails pour l'affichage (sans ajouter au total)
+    if (options.hayonEnlevement) {
+      supplements['Hayon à l\'enlèvement'] = hayonPrice;
+    }
+    if (options.hayonLivraison) {
+      supplements['Hayon à la livraison'] = hayonPrice;
+    }
   }
 
   // Rendez-vous à l'enlèvement (forfait 50€)

@@ -354,13 +354,22 @@ export function calculateCotation(input: CotationInput): CotationResult {
 
     // 4. Calculer le prix total avec options
     // Vérifier si c'est une livraison en région parisienne > 20km de Roissy
+    // Le supplément s'applique UNIQUEMENT pour les livraisons VERS la région parisienne (pas pour les enlèvements)
     let isParisRegionFarFromRoissy = false;
     if (poleIdFormatted === 'roissy' && typeTransport === 'metrePlancher') {
-      // Vérifier si c'est en région parisienne (départements 75, 77, 78, 91, 92, 93, 94, 95)
-      const department = getDepartmentFromPostalCode(input.postalCodeDestination);
+      // Vérifier le département de départ
+      const departmentDepart = getDepartmentFromPostalCode(departurePostalCode);
+      const departmentDestination = getDepartmentFromPostalCode(input.postalCodeDestination);
       const parisRegionDepts = ['75', '77', '78', '91', '92', '93', '94', '95'];
       
-      if (parisRegionDepts.includes(department) && input.destinationCoords) {
+      // Le supplément s'applique uniquement si :
+      // 1. On part de province (hors région parisienne) ou de Roissy
+      // 2. On livre EN région parisienne
+      // 3. La destination est à plus de 20km de Roissy
+      const isFromProvince = !parisRegionDepts.includes(departmentDepart) || departurePostalCode === '95700'; // 95700 = Roissy
+      const isToParisRegion = parisRegionDepts.includes(departmentDestination);
+      
+      if (isFromProvince && isToParisRegion && input.destinationCoords) {
         // Coordonnées de Roissy CDG
         const roissyCoords: [number, number] = [49.0097, 2.5479];
         const distance = calculateDistance(roissyCoords, input.destinationCoords);
