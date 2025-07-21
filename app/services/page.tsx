@@ -22,11 +22,11 @@ const mainServices = [
     name: "Messagerie",
     description: "Service de livraison rapide et flexible pour vos colis et documents. Idéal pour les envois réguliers et les petits volumes.",
     features: [
-      "Livraison de colis et documents",
-      "Service régulier et planifié",
-      "Suivi en temps réel",
-      "Tarifs dégressifs selon volume",
-      "Réseau national de distribution"
+      "Transport de colis et documents",
+      "Tarification avantageuse",
+      "Délais flexibles",
+      "Traçabilité",
+      "Toute France"
     ],
     icon: Package,
     color: "green",
