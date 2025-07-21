@@ -180,6 +180,10 @@ export default function CotationPage() {
     const isDepartIDF = ilesDeFranceDepts.includes(departDept)
     const isArriveeIDF = ilesDeFranceDepts.includes(arriveeDept)
     
+    // Variables pour le pôle et le code postal
+    let poleId = ''
+    let codePostal = ''
+    
     // Variable pour indiquer si c'est un trajet interne IDF
     let isTrajetInterneIDF = false
     
