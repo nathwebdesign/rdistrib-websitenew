@@ -1333,8 +1333,24 @@ export const tarifsExpressRP = {
 
 // Fonction pour obtenir la zone d'une ville
 export function getZoneExpressRP(villeNom: string): 'A' | 'B' | 'C' | 'D' | null {
+  if (!villeNom) return null;
+  
+  // Extraire le nom de la ville de l'adresse complète (même logique que isVilleExpressRP)
+  const matchCodePostalVille = villeNom.match(/\b(\d{5})\s+([^,]+)/);
+  let villeExtraite = villeNom;
+  
+  if (matchCodePostalVille) {
+    villeExtraite = matchCodePostalVille[2].trim();
+  } else {
+    const parts = villeNom.split(',');
+    if (parts.length >= 2) {
+      const possibleVille = parts[parts.length - 2] || parts[0];
+      villeExtraite = possibleVille.replace(/\b\d{5}\b/g, '').trim();
+    }
+  }
+  
   const ville = villesExpressRP.find(v => 
-    v.nom.toUpperCase() === villeNom.toUpperCase()
+    v.nom.toUpperCase() === villeExtraite.toUpperCase()
   );
   return ville ? ville.zone : null;
 }
@@ -1349,7 +1365,32 @@ export function getTarifExpressRP(vehiculeType: string, zone: 'A' | 'B' | 'C' | 
 
 // Fonction pour vérifier si une ville est éligible à l'Express RP
 export function isVilleExpressRP(villeNom: string): boolean {
+  if (!villeNom) return false;
+  
+  // Extraire le nom de la ville de l'adresse complète
+  // Format possible : "Aéroport d'Orly, 94390 Orly, France" → "Orly"
+  // ou "75001 Paris, France" → "Paris"
+  // ou "Orly" → "Orly"
+  
+  // Essayer d'extraire le code postal et la ville
+  const matchCodePostalVille = villeNom.match(/\b(\d{5})\s+([^,]+)/);
+  let villeExtraite = villeNom;
+  
+  if (matchCodePostalVille) {
+    // Format "94390 Orly" → "Orly"
+    villeExtraite = matchCodePostalVille[2].trim();
+  } else {
+    // Chercher la ville après la première virgule mais avant la dernière (qui contient souvent le pays)
+    const parts = villeNom.split(',');
+    if (parts.length >= 2) {
+      // Prendre l'avant-dernière partie qui contient généralement la ville
+      const possibleVille = parts[parts.length - 2] || parts[0];
+      // Retirer le code postal s'il est présent
+      villeExtraite = possibleVille.replace(/\b\d{5}\b/g, '').trim();
+    }
+  }
+  
   return villesExpressRP.some(v => 
-    v.nom.toUpperCase() === villeNom.toUpperCase()
+    v.nom.toUpperCase() === villeExtraite.toUpperCase()
   );
 }
