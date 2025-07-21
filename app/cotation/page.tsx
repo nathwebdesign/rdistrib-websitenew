@@ -180,8 +180,17 @@ export default function CotationPage() {
     const isDepartIDF = ilesDeFranceDepts.includes(departDept)
     const isArriveeIDF = ilesDeFranceDepts.includes(arriveeDept)
     
+    // Variable pour indiquer si c'est un trajet interne IDF
+    let isTrajetInterneIDF = false
+    
+    // Si les deux adresses sont en IDF (transport interne IDF), utiliser Roissy et Express RP
+    if (isDepartIDF && isArriveeIDF && !poleDepartId && !poleArriveeId) {
+      poleId = 'roissy'
+      codePostal = arriveeCodePostal // Utiliser le code postal d'arrivée pour Express RP
+      isTrajetInterneIDF = true
+    }
     // Si départ d'IDF vers province (pas IDF), utiliser Roissy comme pôle
-    if (isDepartIDF && !isArriveeIDF && !poleDepartId && !poleArriveeId) {
+    else if (isDepartIDF && !isArriveeIDF && !poleDepartId && !poleArriveeId) {
       poleId = 'roissy'
       codePostal = arriveeCodePostal
     }
@@ -309,7 +318,9 @@ export default function CotationPage() {
       // Pour les palettes, utiliser le nombre total de palettes du groupe
       const cotation = calculateCotation({
         poleId,
+        postalCodeDepart: isTrajetInterneIDF ? '95700' : undefined, // Code postal Roissy pour trajets internes IDF
         postalCodeDestination: codePostal,
+        cityNameDestination: formData.villeArrivee, // Passer le nom de la ville pour Express RP
         weight: groupe.totalPoids,
         dimensions: groupe.dimensions,
         options,
@@ -388,7 +399,9 @@ export default function CotationPage() {
       if (article.poids && article.longueur && article.largeur && article.hauteur) {
         const cotationMessagerie = calculateCotation({
           poleId,
+          postalCodeDepart: isTrajetInterneIDF ? '95700' : undefined,
           postalCodeDestination: codePostal,
+          cityNameDestination: formData.villeArrivee,
           weight: parseFloat(article.poids),
           dimensions: {
             longueur: parseFloat(article.longueur),
@@ -416,7 +429,7 @@ export default function CotationPage() {
     }
     
     // Vérifier si c'est une livraison en région parisienne
-    const isRegionParisienne = poleId === 'roissy' && ['75', '77', '78', '91', '92', '93', '94', '95'].includes(codePostal.substring(0, 2))
+    const isRegionParisienne = isTrajetInterneIDF || (poleId === 'roissy' && ['75', '77', '78', '91', '92', '93', '94', '95'].includes(codePostal.substring(0, 2)))
     
     // La messagerie est disponible seulement si elle est au moins 1€ moins chère que l'affrètement
     // ET pas en région parisienne
