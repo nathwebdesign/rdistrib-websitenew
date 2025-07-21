@@ -376,16 +376,20 @@ export default function CotationPage() {
       rendezVousLivraison: formData.rendezVousLivraison
     }
 
-    // Calculer si supplément région parisienne nécessaire (> 20km de Roissy)
+    // Calculer si supplément région parisienne nécessaire (> 20km de Roissy) pour AFFRÈTEMENT
     let isParisRegionFarFromRoissy = false
-    if (poleId === 'roissy' && isDepartIDF && coordinates.depart) {
-      // Calculer la distance entre l'adresse de départ et Roissy
-      const distanceFromRoissy = estimateDistance(coordinates.depart, poles['Roissy CDG']) / 2 // Distance simple, pas aller-retour
-      isParisRegionFarFromRoissy = distanceFromRoissy > 20
-    } else if (poleId === 'roissy' && isArriveeIDF && coordinates.arrivee) {
-      // Calculer la distance entre l'adresse d'arrivée et Roissy
-      const distanceFromRoissy = estimateDistance(coordinates.arrivee, poles['Roissy CDG']) / 2 // Distance simple, pas aller-retour
-      isParisRegionFarFromRoissy = distanceFromRoissy > 20
+    // Si on utilise Roissy comme pôle ET que ce n'est PAS un trajet interne IDF
+    if (poleId === 'roissy' && !isTrajetInterneIDF) {
+      // Si départ d'IDF vers province
+      if (isDepartIDF && coordinates.depart) {
+        const distanceFromRoissy = estimateDistance(coordinates.depart, poles['Roissy CDG']) / 2 // Distance simple
+        isParisRegionFarFromRoissy = distanceFromRoissy > 20
+      } 
+      // Si arrivée en IDF depuis province
+      else if (isArriveeIDF && coordinates.arrivee) {
+        const distanceFromRoissy = estimateDistance(coordinates.arrivee, poles['Roissy CDG']) / 2 // Distance simple
+        isParisRegionFarFromRoissy = distanceFromRoissy > 20
+      }
     }
     
     // Calculer le prix total avec options
@@ -474,7 +478,7 @@ export default function CotationPage() {
     // Calculer aussi le pricing pour la messagerie si disponible
     let pricingMessagerie = null
     if (isMessagerieOptionAvailable && prixMessagerieTotal) {
-      pricingMessagerie = calculateTotalPrice(prixMessagerieTotal, options, poleId)
+      pricingMessagerie = calculateTotalPrice(prixMessagerieTotal, options, poleId, isParisRegionFarFromRoissy)
     }
 
     setResultat({
