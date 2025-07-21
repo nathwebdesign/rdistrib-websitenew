@@ -20,9 +20,9 @@ const services = [
   },
   {
     name: "Express",
-    description: "Livraisons urgentes en moins de 24h sur les principaux axes français.",
+    description: "Crée pour les urgences, L'EXPRESS répond à votre besoin de livraison ultra rapide en France et en Europe",
     icon: Clock,
-    features: ["Urgences", "24h chrono", "Suivi temps réel"],
+    features: ["Un camion spécialement affrété rien que pour vous", "Chargement et livraison en direct : votre marchandise ne quitte pas le camion une fois chargée jusqu'à destination", "Suivi en temps réel"],
     color: "orange"
   }
 ]
