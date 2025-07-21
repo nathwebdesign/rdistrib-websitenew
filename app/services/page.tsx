@@ -36,11 +36,11 @@ const mainServices = [
     name: "Express",
     description: "Pour vos urgences, notre équipe réactive trouve la solution transport adaptée dans les plus brefs délais.",
     features: [
-      "Livraison urgente et prioritaire",
-      "Réactivité maximale",
-      "Solutions immédiates",
-      "Transport dédié si nécessaire",
-      "Service premium garanti"
+      "Véhicule dédié complètement à votre transport et vos marchandises",
+      "Chargement au point d'expédition puis livraison en direct sans passage à quai",
+      "Flexibilité pour vos contraintes les plus spécifiques (attente douane/compagnie, manutention etc)",
+      "Réactivité maximale pour vos demandes urgentes",
+      "En France et en Europe"
     ],
     icon: Clock,
     color: "orange",
