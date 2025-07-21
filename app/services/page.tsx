@@ -92,7 +92,18 @@ export default function ServicesPage() {
           </p>
         </motion.div>
 
-        <div className="mx-auto mt-16 max-w-7xl">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mx-auto max-w-3xl text-center mt-8"
+        >
+          <p className="text-xl font-semibold text-orange-600">
+            En cas de transport urgent, des solutions rapides, fiables, rien que pour vous
+          </p>
+        </motion.div>
+
+        <div className="mx-auto mt-12 max-w-7xl">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             {mainServices.map((service, index) => {
               const colors = getColorClasses(service.color)
