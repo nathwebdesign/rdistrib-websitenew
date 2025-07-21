@@ -13,9 +13,9 @@ const services = [
   },
   {
     name: "Messagerie",
-    description: "Livraison rapide de colis et palettes sur toute la France avec traçabilité complète.",
+    description: "Vous avez un petit colis, léger, et des dates flexibles ? Pensez à la messagerie !",
     icon: Package,
-    features: ["Colis & palettes", "Traçabilité", "J+1 à J+3"],
+    features: ["Colis jusqu'à 100Kgs et 80*60*100 cms", "Traçabilité", "Livraison en 48-72h"],
     color: "green"
   },
   {
