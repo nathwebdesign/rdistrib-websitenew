@@ -192,7 +192,7 @@ export function calculateExpressPrice(
   }
   
   if (options?.rendezVous) {
-    supplements.rendezVous = 50;
+    supplements.rendezVous = 20;
     totalHT += supplements.rendezVous;
   }
   

@@ -196,15 +196,15 @@ export function calculateTotalPrice(
     }
   }
 
-  // Rendez-vous à l'enlèvement (forfait 50€)
+  // Rendez-vous à l'enlèvement (forfait 20€)
   if (options.rendezVousEnlevement) {
-    supplements.rendezVousEnlevement = 50;
+    supplements.rendezVousEnlevement = 20;
     totalHT += supplements.rendezVousEnlevement;
   }
 
-  // Rendez-vous à la livraison (forfait 50€)
+  // Rendez-vous à la livraison (forfait 20€)
   if (options.rendezVousLivraison) {
-    supplements.rendezVousLivraison = 50;
+    supplements.rendezVousLivraison = 20;
     totalHT += supplements.rendezVousLivraison;
   }
 

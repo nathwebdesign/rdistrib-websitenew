@@ -170,18 +170,32 @@ export default function CotationPage() {
     const poleDepartId = detectPole(formData.villeDepart)
     const poleArriveeId = detectPole(formData.villeArrivee)
     
-    // Vérifier qu'au moins une adresse contient un pôle
-    if (!poleDepartId && !poleArriveeId) {
+    // Vérifier si c'est un départ ou arrivée en région parisienne
+    const departCodePostal = extractPostalCode(formData.villeDepart)
+    const arriveeCodePostal = extractPostalCode(formData.villeArrivee)
+    const departDept = departCodePostal ? departCodePostal.substring(0, 2) : ''
+    const arriveeDept = arriveeCodePostal ? arriveeCodePostal.substring(0, 2) : ''
+    const ilesDeFranceDepts = ['75', '77', '78', '91', '92', '93', '94', '95']
+    
+    const isDepartIDF = ilesDeFranceDepts.includes(departDept)
+    const isArriveeIDF = ilesDeFranceDepts.includes(arriveeDept)
+    
+    // Si départ d'IDF vers province (pas IDF), utiliser Roissy comme pôle
+    if (isDepartIDF && !isArriveeIDF && !poleDepartId && !poleArriveeId) {
+      poleId = 'roissy'
+      codePostal = arriveeCodePostal
+    }
+    // Si arrivée en IDF depuis province (pas IDF), utiliser Roissy comme pôle
+    else if (!isDepartIDF && isArriveeIDF && !poleDepartId && !poleArriveeId) {
+      poleId = 'roissy'
+      codePostal = departCodePostal
+    }
+    // Sinon, logique habituelle
+    else if (!poleDepartId && !poleArriveeId) {
       setError('Aucun de nos pôles détecté dans les adresses. Veuillez nous contacter pour un devis personnalisé.')
       setShowResult(false)
       return
-    }
-    
-    // Déterminer quel pôle utiliser et quel code postal
-    let poleId = ''
-    let codePostal = ''
-    
-    if (poleDepartId) {
+    } else if (poleDepartId) {
       // Transport depuis un pôle
       poleId = poleDepartId
       codePostal = extractPostalCode(formData.villeArrivee)
@@ -270,7 +284,13 @@ export default function CotationPage() {
         
         if (article.type === 'palette') {
           // Si nombre de palettes spécifié, l'utiliser, sinon compter 1
-          const nbPalettes = article.nombrePalettes ? parseInt(article.nombrePalettes) : 1
+          let nbPalettes = article.nombrePalettes ? parseInt(article.nombrePalettes) : 1
+          
+          // Si gerbable, diviser par 2 (arrondi au supérieur)
+          if (article.gerbable) {
+            nbPalettes = Math.ceil(nbPalettes / 2)
+          }
+          
           groupe.totalPalettes += nbPalettes
         }
       }
@@ -345,8 +365,20 @@ export default function CotationPage() {
       rendezVousLivraison: formData.rendezVousLivraison
     }
 
+    // Calculer si supplément région parisienne nécessaire (> 20km de Roissy)
+    let isParisRegionFarFromRoissy = false
+    if (poleId === 'roissy' && isDepartIDF && coordinates.depart) {
+      // Calculer la distance entre l'adresse de départ et Roissy
+      const distanceFromRoissy = estimateDistance(coordinates.depart, poles['Roissy CDG']) / 2 // Distance simple, pas aller-retour
+      isParisRegionFarFromRoissy = distanceFromRoissy > 20
+    } else if (poleId === 'roissy' && isArriveeIDF && coordinates.arrivee) {
+      // Calculer la distance entre l'adresse d'arrivée et Roissy
+      const distanceFromRoissy = estimateDistance(coordinates.arrivee, poles['Roissy CDG']) / 2 // Distance simple, pas aller-retour
+      isParisRegionFarFromRoissy = distanceFromRoissy > 20
+    }
+    
     // Calculer le prix total avec options
-    const pricing = calculateTotalPrice(prixTotalBase, options, poleId)
+    const pricing = calculateTotalPrice(prixTotalBase, options, poleId, isParisRegionFarFromRoissy)
 
     // Toujours calculer le prix messagerie pour comparaison
     let prixMessagerieTotal = null
