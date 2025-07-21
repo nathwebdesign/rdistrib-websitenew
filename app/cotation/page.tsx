@@ -383,8 +383,13 @@ export default function CotationPage() {
       prixMessagerieTotal = resultatsMessagerieArticles.reduce((sum, r) => sum + r.pricing.basePrice, 0)
     }
     
+    // Vérifier si c'est une livraison en région parisienne
+    const isRegionParisienne = poleId === 'roissy' && ['75', '77', '78', '91', '92', '93', '94', '95'].includes(codePostal.substring(0, 2))
+    
     // La messagerie est disponible seulement si elle est au moins 1€ moins chère que l'affrètement
-    const isMessagerieOptionAvailable = prixMessagerieTotal !== null && 
+    // ET pas en région parisienne
+    const isMessagerieOptionAvailable = !isRegionParisienne &&
+                                       prixMessagerieTotal !== null && 
                                        prixMessagerieTotal < (pricing.totalHT - 1)
 
     // Calculer le prix Express
@@ -454,7 +459,7 @@ export default function CotationPage() {
             : 'Messagerie non disponible pour cette configuration'
         },
         affretement: {
-          disponible: true,
+          disponible: !isRegionParisienne,
           prix: pricing.totalHT
         },
         express: {
@@ -475,6 +480,11 @@ export default function CotationPage() {
         }
       }
     })
+    
+    // Si région parisienne et Express disponible, le sélectionner automatiquement
+    if (isRegionParisienne && vehiculeExpress !== null) {
+      setSelectedDelivery('express')
+    }
     
     setShowResult(true)
   }
@@ -1017,11 +1027,14 @@ export default function CotationPage() {
                   
                   {/* Affrètement */}
                   <button
-                    onClick={() => setSelectedDelivery('affretement')}
+                    onClick={() => resultat.optionsLivraison.affretement.disponible && setSelectedDelivery('affretement')}
+                    disabled={!resultat.optionsLivraison.affretement.disponible}
                     className={`relative p-6 rounded-xl border-2 transition-all transform hover:scale-105 ${
                       selectedDelivery === 'affretement'
                         ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg scale-105'
-                        : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md cursor-pointer'
+                        : resultat.optionsLivraison.affretement.disponible 
+                          ? 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md cursor-pointer' 
+                          : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
                     }`}
                   >
                     {selectedDelivery === 'affretement' && (
@@ -1043,12 +1056,16 @@ export default function CotationPage() {
                       <p className="text-xs text-gray-600 mb-3 h-8">
                         Palettes et colis volumineux
                       </p>
-                      <div>
-                        <p className="text-2xl font-bold text-blue-600">
-                          {formatPrice(resultat.optionsLivraison.affretement.prix)}
-                        </p>
-                        <p className="text-xs text-gray-500">HT</p>
-                      </div>
+                      {resultat.optionsLivraison.affretement.disponible ? (
+                        <div>
+                          <p className="text-2xl font-bold text-blue-600">
+                            {formatPrice(resultat.optionsLivraison.affretement.prix)}
+                          </p>
+                          <p className="text-xs text-gray-500">HT</p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-500">Non disponible en région parisienne</p>
+                      )}
                     </div>
                   </button>
                   
