@@ -8,11 +8,11 @@ const mainServices = [
     name: "Affrètement",
     description: "Solutions complètes pour vos besoins de transport. Nous trouvons les transporteurs adaptés à vos marchandises et vos contraintes.",
     features: [
-      "Transport de palettes et marchandises",
-      "Camion complet ou groupage",
-      "Véhicules spécialisés (plateau, grue, hayon)",
-      "Transport exceptionnel et convois",
-      "Solutions nationales et internationales"
+      "Transport de marchandises palettisées uniquement",
+      "Lots complets ou demi lots",
+      "Transport conventionnel ou exceptionnel",
+      "Véhicules avec ou sans hayon",
+      "Semi-remorques, tôlées ou débâchables, plateau, grue, porteur 19/26t…"
     ],
     icon: Truck,
     color: "blue",
