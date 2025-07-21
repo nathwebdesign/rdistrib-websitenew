@@ -6,9 +6,9 @@ import { Truck, Package, Clock } from "lucide-react"
 const services = [
   {
     name: "Affrètement",
-    description: "Organisation complète de vos transports avec notre réseau de partenaires sélectionnés.",
+    description: "Organisation des transports de vos palettes avec notre réseau de partenaires de confiance",
     icon: Truck,
-    features: ["Camions complets", "Groupage", "France entière"],
+    features: ["Lots complets & demi-lots", "Groupage", "France & Europe"],
     color: "blue"
   },
   {
