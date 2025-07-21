@@ -104,7 +104,8 @@ export function calculateCotation(input: CotationInput): CotationResult {
     const departurePostalCode = input.postalCodeDepart || getDefaultPostalCodeForPole(poleIdFormatted);
     
     // Vérifier si c'est une livraison Express RP
-    if (poleIdFormatted === 'roissy' && isExpressRP(departurePostalCode, input.postalCodeDestination)) {
+    // Express RP s'applique SAUF si on force explicitement la messagerie
+    if (poleIdFormatted === 'roissy' && isExpressRP(departurePostalCode, input.postalCodeDestination) && input.forceType !== 'messagerie') {
       return calculateExpressRPCotation(input, departurePostalCode);
     }
     
@@ -115,8 +116,24 @@ export function calculateCotation(input: CotationInput): CotationResult {
       department: getDepartmentFromPostalCode(input.postalCodeDestination)
     });
     
-    const zone = getZoneByPostalCodeAndPole(input.postalCodeDestination, poleIdFormatted);
+    let zone = getZoneByPostalCodeAndPole(input.postalCodeDestination, poleIdFormatted);
     console.log('Zone trouvée:', zone);
+    
+    // Cas spécial : messagerie depuis Roissy vers l'Île-de-France
+    if (!zone && poleIdFormatted === 'roissy' && input.forceType === 'messagerie') {
+      const destDept = getDepartmentFromPostalCode(input.postalCodeDestination);
+      const ilesDeFranceDepts = ['75', '77', '78', '91', '92', '93', '94', '95'];
+      
+      if (ilesDeFranceDepts.includes(destDept)) {
+        // Créer une zone virtuelle pour Express RP
+        zone = {
+          code: 'EXPRESS_RP',
+          name: 'Express RP (Île-de-France)',
+          departments: ilesDeFranceDepts,
+          delai: 'J+1'
+        };
+      }
+    }
     
     if (!zone) {
       return {

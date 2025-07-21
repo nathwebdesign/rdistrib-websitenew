@@ -17,6 +17,12 @@ export interface TarifMessagerie {
 // Zones messagerie (communes à tous les pôles)
 export const zonesMessagerie: ZoneMessagerie[] = [
   {
+    code: 'EXPRESS_RP',
+    name: 'Express RP (Île-de-France)',
+    departments: ['75', '77', '78', '91', '92', '93', '94', '95'],
+    delai: 'J+1'
+  },
+  {
     code: 'R1',
     name: 'Zone R1',
     departments: ['27', '28', '45', '60', '76'],
@@ -90,6 +96,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 0,
     maxWeight: 9,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 41,
       'R2': 42,
       'R3': 43,
@@ -107,6 +114,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 10,
     maxWeight: 19,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 51,
       'R2': 52,
       'R3': 53,
@@ -124,6 +132,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 20,
     maxWeight: 29,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 51,
       'R2': 62,
       'R3': 63,
@@ -141,6 +150,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 30,
     maxWeight: 39,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 61,
       'R2': 62,
       'R3': 63,
@@ -158,6 +168,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 40,
     maxWeight: 49,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 61,
       'R2': 72,
       'R3': 73,
@@ -175,6 +186,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 50,
     maxWeight: 59,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 71,
       'R2': 72,
       'R3': 73,
@@ -192,6 +204,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 60,
     maxWeight: 69,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 81,
       'R2': 82,
       'R3': 83,
@@ -209,6 +222,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 70,
     maxWeight: 79,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 91,
       'R2': 92,
       'R3': 93,
@@ -226,6 +240,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 80,
     maxWeight: 89,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 91,
       'R2': 92,
       'R3': 93,
@@ -243,6 +258,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 90,
     maxWeight: 99,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 101,
       'R2': 102,
       'R3': 103,
@@ -260,6 +276,7 @@ export const tarifsMessagerie: TarifMessagerie[] = [
     minWeight: 100,
     maxWeight: 199,
     zones: {
+      'EXPRESS_RP': 80,
       'R1': 101,
       'R2': 102,
       'R3': 103,

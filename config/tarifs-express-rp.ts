@@ -1,5 +1,7 @@
 // Configuration des tarifs Express RP (Région Parisienne)
 
+import { villesExpressRP } from './zones-express-rp';
+
 export interface TarifExpressRP {
   vehicle: string;
   prices: {
@@ -154,7 +156,28 @@ export const zonesExpressRP = {
 export function getExpressRPZone(postalCode: string, cityName?: string): string | null {
   const dept = postalCode.substring(0, 2);
   
-  // Vérifier chaque zone
+  // D'abord, chercher dans la liste des villes Express RP par code postal
+  const villeByPostalCode = villesExpressRP.find(ville => 
+    ville.codePostal === dept || ville.codePostal === postalCode.substring(0, 3) || ville.codePostal === postalCode
+  );
+  
+  if (villeByPostalCode) {
+    return villeByPostalCode.zone;
+  }
+  
+  // Si pas trouvé par code postal, chercher par nom de ville si fourni
+  if (cityName) {
+    const normalizedCityName = cityName.toUpperCase().trim();
+    const villeByName = villesExpressRP.find(ville =>
+      ville.nom === normalizedCityName && ville.codePostal === dept
+    );
+    
+    if (villeByName) {
+      return villeByName.zone;
+    }
+  }
+  
+  // Ensuite, vérifier dans la structure zonesExpressRP
   for (const [zoneCode, zoneData] of Object.entries(zonesExpressRP)) {
     // Vérifier si le département entier est dans la zone
     if ('departments' in zoneData && zoneData.departments?.includes(dept)) {

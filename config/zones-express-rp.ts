@@ -334,7 +334,7 @@ export const villesExpressRP: VilleExpressRP[] = [
   { nom: "VELIZY VILLACOUBLAY", codePostal: "78", zone: "A" },
   { nom: "VEMARS", codePostal: "95", zone: "A" },
   { nom: "VERRIERES LE BUISSON", codePostal: "91", zone: "A" },
-  { nom: "VERSAILLES", codePostal: "78", zone: "A" },
+  { nom: "VERSAILLES", codePostal: "78", zone: "C" },
   { nom: "VIARMES", codePostal: "95", zone: "A" },
   { nom: "VIGNEUX SUR SEINE", codePostal: "91", zone: "A" },
   { nom: "VILLAINES SOUS BOIS", codePostal: "95", zone: "A" },
@@ -1357,10 +1357,11 @@ export function getZoneExpressRP(villeNom: string): 'A' | 'B' | 'C' | 'D' | null
 
 // Fonction pour obtenir le tarif Express RP
 export function getTarifExpressRP(vehiculeType: string, zone: 'A' | 'B' | 'C' | 'D'): number | null {
-  const tarifsVehicule = tarifsExpressRP[vehiculeType as keyof typeof tarifsExpressRP];
-  if (!tarifsVehicule) return null;
+  // Chercher le véhicule dans le tableau
+  const tarifVehicle = tarifsExpressRP.find(t => t.vehicle.toLowerCase() === vehiculeType.toLowerCase());
+  if (!tarifVehicle) return null;
   
-  return tarifsVehicule[zone] || null;
+  return tarifVehicle.prices[zone] || null;
 }
 
 // Fonction pour vérifier si une ville est éligible à l'Express RP
