@@ -251,7 +251,7 @@ export default function HeroSection() {
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               />
               <img
-                src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2070"
+                src="/images/photordistrib2.png"
                 alt="Camion de livraison R DISTRIB SOLUTIONS"
                 className="relative w-full rounded-2xl shadow-2xl ring-1 ring-white/50 ring-offset-4 ring-offset-blue-50"
               />
