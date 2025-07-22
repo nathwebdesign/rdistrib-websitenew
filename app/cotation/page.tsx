@@ -188,7 +188,7 @@ export default function CotationPage() {
     let isTrajetInterneIDF = false
     
     // Si les deux adresses sont en IDF (transport interne IDF), utiliser Roissy et Express RP
-    if (isDepartIDF && isArriveeIDF && !poleDepartId && !poleArriveeId) {
+    if (isDepartIDF && isArriveeIDF) {
       poleId = 'roissy'
       codePostal = arriveeCodePostal // Utiliser le code postal d'arrivée pour Express RP
       isTrajetInterneIDF = true
