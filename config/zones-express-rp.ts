@@ -212,7 +212,7 @@ export const villesExpressRP: VilleExpressRP[] = [
   { nom: "MARLY LA VILLE", codePostal: "95", zone: "A" },
   { nom: "MARNE LA COQUETTE", codePostal: "92", zone: "A" },
   { nom: "MAROLLES EN BRIE", codePostal: "77", zone: "A" },
-  { nom: "MASSY", codePostal: "91", zone: "A" },
+  { nom: "MASSY", codePostal: "91", zone: "B" },
   { nom: "MAUREGARD", codePostal: "77", zone: "A" },
   { nom: "MENNECY", codePostal: "91", zone: "A" },
   { nom: "MENUCOURT", codePostal: "95", zone: "A" },
@@ -334,7 +334,7 @@ export const villesExpressRP: VilleExpressRP[] = [
   { nom: "VELIZY VILLACOUBLAY", codePostal: "78", zone: "A" },
   { nom: "VEMARS", codePostal: "95", zone: "A" },
   { nom: "VERRIERES LE BUISSON", codePostal: "91", zone: "A" },
-  { nom: "VERSAILLES", codePostal: "78", zone: "C" },
+  { nom: "VERSAILLES", codePostal: "78", zone: "A" },
   { nom: "VIARMES", codePostal: "95", zone: "A" },
   { nom: "VIGNEUX SUR SEINE", codePostal: "91", zone: "A" },
   { nom: "VILLAINES SOUS BOIS", codePostal: "95", zone: "A" },
@@ -1297,39 +1297,8 @@ export const villesExpressRP: VilleExpressRP[] = [
   { nom: "WY DIT JOLI VILLAGE", codePostal: "95", zone: "C" },
 ];
 
-// Grille tarifaire Express RP par zone et par véhicule
-export const tarifsExpressRP = {
-  break: {
-    A: 45,
-    B: 50,
-    C: 55,
-    D: 60
-  },
-  fourgon: {
-    A: 65,
-    B: 75,
-    C: 85,
-    D: 95
-  },
-  gv20m3: {
-    A: 85,
-    B: 100,
-    C: 115,
-    D: 130
-  },
-  porteur: {
-    A: 120,
-    B: 140,
-    C: 160,
-    D: 180
-  },
-  semi: {
-    A: 180,
-    B: 210,
-    C: 240,
-    D: 270
-  }
-};
+// Import des tarifs depuis le fichier principal
+import { tarifsExpressRP } from './tarifs-express-rp';
 
 // Fonction pour obtenir la zone d'une ville
 export function getZoneExpressRP(villeNom: string): 'A' | 'B' | 'C' | 'D' | null {
