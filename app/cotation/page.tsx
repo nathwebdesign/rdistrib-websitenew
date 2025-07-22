@@ -244,7 +244,10 @@ export default function CotationPage() {
           hauteur: parseFloat(article.hauteur) || 0
         }
         const weight = parseFloat(article.poids) || 0
-        poidsTotal += weight
+        const quantity = article.nombrePalettes ? parseInt(article.nombrePalettes) : 1
+        
+        // Multiplier le poids par la quantité pour le poids total
+        poidsTotal += weight * quantity
 
         // Vérifier si hayon nécessaire
         if (dimensions.hauteur > 120 || weight > 1000) {
@@ -293,7 +296,7 @@ export default function CotationPage() {
         
         const groupe = articlesGroupes[key]
         groupe.articles.push(article)
-        groupe.totalPoids += weight
+        groupe.totalPoids += weight * quantity
         
         if (article.type === 'palette') {
           // Si nombre de palettes spécifié, l'utiliser, sinon compter 1
@@ -305,6 +308,10 @@ export default function CotationPage() {
           }
           
           groupe.totalPalettes += nbPalettes
+        } else if (article.type === 'colis') {
+          // Pour les colis, utiliser le nombre spécifié
+          const nbColis = article.nombrePalettes ? parseInt(article.nombrePalettes) : 1
+          groupe.totalPalettes += nbColis
         }
       }
     })
@@ -405,12 +412,13 @@ export default function CotationPage() {
     
     articles.forEach((article, index) => {
       if (article.poids && article.longueur && article.largeur && article.hauteur) {
+        const quantity = article.nombrePalettes ? parseInt(article.nombrePalettes) : 1
         const cotationMessagerie = calculateCotation({
           poleId,
           postalCodeDepart: isTrajetInterneIDF ? '95700' : undefined,
           postalCodeDestination: codePostal,
           cityNameDestination: formData.villeArrivee,
-          weight: parseFloat(article.poids),
+          weight: parseFloat(article.poids) * quantity, // Multiplier le poids par la quantité
           dimensions: {
             longueur: parseFloat(article.longueur),
             largeur: parseFloat(article.largeur),
@@ -1203,7 +1211,9 @@ export default function CotationPage() {
                             <span className="ml-2 font-medium">
                               {item.transport.type === 'Mètre de plancher' 
                                 ? `${item.transport.quantity} m`
-                                : `${item.transport.quantity} palette${item.transport.quantity > 1 ? 's' : ''}`
+                                : item.article.type === 'colis'
+                                  ? `${item.transport.quantity} colis`
+                                  : `${item.transport.quantity} palette${item.transport.quantity > 1 ? 's' : ''}`
                               }
                             </span>
                           </div>
