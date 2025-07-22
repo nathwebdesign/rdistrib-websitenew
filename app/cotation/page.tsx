@@ -524,20 +524,24 @@ export default function CotationPage() {
           prix: pricing.totalHT
         },
         express: {
-          disponible: vehiculeExpress !== null,
-          prix: prixExpressTotal,
-          vehicule: vehiculeExpress?.nom,
+          disponible: vehiculeExpress !== null || isRegionParisienne,
+          prix: isRegionParisienne ? pricing.totalHT : prixExpressTotal,
+          vehicule: isRegionParisienne 
+            ? resultatsArticles[0]?.transport?.vehicleType
+            : vehiculeExpress?.nom,
           distance: distanceAllerRetour,
-          message: vehiculeExpress 
-            ? (() => {
-                const zone = isVilleExpressRP(formData.villeArrivee) ? getZoneExpressRP(formData.villeArrivee) : null;
-                if (zone) {
-                  return `${vehiculeExpress.nom} (${vehiculeExpress.capacite.descriptionCapacite || `max ${vehiculeExpress.capacite.poidsMax}kg`}) - Zone ${zone}`;
-                } else {
-                  return `${vehiculeExpress.nom} (${vehiculeExpress.capacite.descriptionCapacite || `max ${vehiculeExpress.capacite.poidsMax}kg`}) - ${distanceAllerRetour} km A/R × ${vehiculeExpress.coefficient}€/km`;
-                }
-              })()
-            : 'Dimensions ou poids trop importants pour l\'Express'
+          message: isRegionParisienne
+            ? `Express RP - ${resultatsArticles[0]?.transport?.vehicleType || 'Service rapide'} - Zone ${resultatsArticles[0]?.zone?.code?.replace('EXPRESS_RP_', '') || ''}`
+            : vehiculeExpress 
+              ? (() => {
+                  const zone = isVilleExpressRP(formData.villeArrivee) ? getZoneExpressRP(formData.villeArrivee) : null;
+                  if (zone) {
+                    return `${vehiculeExpress.nom} (${vehiculeExpress.capacite.descriptionCapacite || `max ${vehiculeExpress.capacite.poidsMax}kg`}) - Zone ${zone}`;
+                  } else {
+                    return `${vehiculeExpress.nom} (${vehiculeExpress.capacite.descriptionCapacite || `max ${vehiculeExpress.capacite.poidsMax}kg`}) - ${distanceAllerRetour} km A/R × ${vehiculeExpress.coefficient}€/km`;
+                  }
+                })()
+              : 'Dimensions ou poids trop importants pour l\'Express'
         }
       }
     })
