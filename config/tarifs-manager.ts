@@ -238,7 +238,7 @@ export function calculateTotalPrice(
     totalHT += supplements.assurance;
   }
 
-  // Supplément région parisienne > 20km de Roissy (affrètement uniquement)
+  // Supplément région parisienne > 50km de Roissy (affrètement uniquement)
   if (isParisRegionFarFromRoissy) {
     supplements.supplementRegionParisienne = 20;
     totalHT += supplements.supplementRegionParisienne;

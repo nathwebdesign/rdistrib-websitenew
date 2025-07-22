@@ -387,7 +387,7 @@ export default function CotationPage() {
       rendezVousLivraison: formData.rendezVousLivraison
     }
 
-    // Calculer si supplément région parisienne nécessaire (> 20km de Roissy) pour AFFRÈTEMENT
+    // Calculer si supplément région parisienne nécessaire (> 50km de Roissy) pour AFFRÈTEMENT
     let isParisRegionFarFromRoissy = false
     // Si on utilise Roissy comme pôle ET que ce n'est PAS un trajet interne IDF
     if (poleId === 'roissy' && !isTrajetInterneIDF) {
@@ -1320,7 +1320,7 @@ export default function CotationPage() {
                           {key === 'attente' && 'Frais d\'attente'}
                           {key === 'matieresDangereuses' && 'Kit ADR (+25%)'}
                           {key === 'quantiteLimitee' && 'Quantité limitée (sans supplément)'}
-                          {key === 'supplementRegionParisienne' && 'Supplément région parisienne (>20km de Roissy)'}
+                          {key === 'supplementRegionParisienne' && 'Supplément région parisienne (>50km de Roissy)'}
                           {key === 'assurance' && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Assurance</span>}
                         </span>
                         <span className="font-medium">{formatPrice(value as number)}</span>

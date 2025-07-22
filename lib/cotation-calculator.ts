@@ -370,7 +370,7 @@ export function calculateCotation(input: CotationInput): CotationResult {
     }
 
     // 4. Calculer le prix total avec options
-    // Vérifier si c'est une livraison en région parisienne > 20km de Roissy
+    // Vérifier si c'est une livraison en région parisienne > 50km de Roissy
     // Le supplément s'applique UNIQUEMENT pour les livraisons VERS la région parisienne (pas pour les enlèvements)
     let isParisRegionFarFromRoissy = false;
     if (poleIdFormatted === 'roissy' && typeTransport === 'metrePlancher') {
@@ -382,7 +382,7 @@ export function calculateCotation(input: CotationInput): CotationResult {
       // Le supplément s'applique uniquement si :
       // 1. On part de province (hors région parisienne) ou de Roissy
       // 2. On livre EN région parisienne
-      // 3. La destination est à plus de 20km de Roissy
+      // 3. La destination est à plus de 50km de Roissy
       const isFromProvince = !parisRegionDepts.includes(departmentDepart) || departurePostalCode === '95700'; // 95700 = Roissy
       const isToParisRegion = parisRegionDepts.includes(departmentDestination);
       
@@ -391,8 +391,8 @@ export function calculateCotation(input: CotationInput): CotationResult {
         const roissyCoords: [number, number] = [49.0097, 2.5479];
         const distance = calculateDistance(roissyCoords, input.destinationCoords);
         
-        // Si > 20km de Roissy, appliquer le supplément
-        if (distance > 20) {
+        // Si > 50km de Roissy, appliquer le supplément
+        if (distance > 50) {
           isParisRegionFarFromRoissy = true;
         }
       }
