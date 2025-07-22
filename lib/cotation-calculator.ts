@@ -690,7 +690,7 @@ function calculateExpressRPCotation(input: CotationInput, departurePostalCode: s
         },
         transport: {
           type: 'Express RP',
-          quantity: 1,
+          quantity: input.nombrePalettes || 1,
           weight: input.weight,
           transportMode: 'expressRP',
           vehicleType: vehicle,
