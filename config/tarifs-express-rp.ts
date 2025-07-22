@@ -17,46 +17,46 @@ export const tarifsExpressRP: TarifExpressRP[] = [
   {
     vehicle: 'Break',
     prices: {
-      A: 80,
-      B: 90,
-      C: 100,
-      D: 120
+      A: 45,
+      B: 50,
+      C: 70,
+      D: 90
     }
   },
   {
     vehicle: 'Fourgon',
     prices: {
-      A: 100,
-      B: 110,
-      C: 125,
-      D: 145
+      A: 70,
+      B: 80,
+      C: 100,
+      D: 120
     }
   },
   {
     vehicle: 'GV 20m³',
     prices: {
-      A: 140,
-      B: 155,
-      C: 175,
-      D: 200
+      A: 90,
+      B: 105,
+      C: 120,
+      D: 135
     }
   },
   {
     vehicle: 'Porteur',
     prices: {
-      A: 180,
-      B: 200,
-      C: 225,
-      D: 260
+      A: 210,
+      B: 230,
+      C: 260,
+      D: 290
     }
   },
   {
     vehicle: 'Semi',
     prices: {
-      A: 250,
-      B: 280,
-      C: 315,
-      D: 365
+      A: 290,
+      B: 300,
+      C: 330,
+      D: 370
     }
   }
 ];
