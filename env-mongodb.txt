@@ -1,0 +1,3 @@
+Ajoutez cette ligne à votre .env.local :
+
+MONGODB_URI=mongodb+srv://rdistrib:rdistrib2024@cluster0.mongodb.net/rdistrib?retryWrites=true&w=majority

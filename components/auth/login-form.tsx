@@ -22,7 +22,7 @@ export default function LoginForm() {
     setError('')
 
     try {
-      const response = await fetch('/api/auth/simple-login', {
+      const response = await fetch('/api/mongo/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

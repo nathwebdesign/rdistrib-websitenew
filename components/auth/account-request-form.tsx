@@ -28,7 +28,7 @@ export default function AccountRequestForm() {
     setError('')
 
     try {
-      const response = await fetch('/api/account-request-simple', {
+      const response = await fetch('/api/mongo/create-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -17,7 +17,7 @@ export default function AccountRequestsList() {
 
   const loadRequests = async () => {
     try {
-      const response = await fetch('/api/admin/get-requests')
+      const response = await fetch('/api/mongo/get-requests')
       const data = await response.json()
       setRequests(data || [])
     } catch (error) {
@@ -31,7 +31,7 @@ export default function AccountRequestsList() {
   const handleApprove = async (requestId: string) => {
     setProcessingId(requestId)
     try {
-      const response = await fetch('/api/admin/approve-account', {
+      const response = await fetch('/api/mongo/approve-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
