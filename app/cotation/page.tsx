@@ -9,11 +9,9 @@ import { getDepartmentFromPostalCode } from "@/config/zones"
 import { calculateTotalPrice } from "@/config/tarifs-manager"
 import { selectExpressVehicle, calculateExpressPrice, estimateDistance } from "@/config/tarifs-express"
 import { getZoneExpressRP, isVilleExpressRP } from "@/config/zones-express-rp"
-import { useAuth } from "@/components/auth/auth-provider"
+import { useSimpleAuth } from "@/components/auth/simple-auth-provider"
 import { useRouter } from "next/navigation"
-import ProtectedRoute from "@/components/auth/protected-route"
 import toast from "react-hot-toast"
-import { supabase } from "@/lib/supabase"
 
 const Map = dynamic(() => import("@/components/cotation/map"), { ssr: false })
 const AddressAutocomplete = dynamic(() => import("@/components/cotation/address-autocomplete-free"), { ssr: false })
@@ -62,7 +60,8 @@ function CotationContent() {
   const [showResult, setShowResult] = useState(false)
   const [selectedDelivery, setSelectedDelivery] = useState<'messagerie' | 'affretement' | 'express' | null>(null)
   const [isSendingRequest, setIsSendingRequest] = useState(false)
-  const { user, profile } = useAuth()
+  const { user } = useSimpleAuth()
+  const profile = user?.profile || {}
   const router = useRouter()
 
   const handleSendRequest = async () => {
@@ -107,14 +106,10 @@ function CotationContent() {
         }
       }
 
-      // Récupérer le token de session
-      const { data: { session } } = await supabase.auth.getSession()
-      
       const response = await fetch('/api/cotation/send-request', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || ''}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(cotationData)
       })
@@ -1578,9 +1573,5 @@ function CotationContent() {
 }
 
 export default function CotationPage() {
-  return (
-    <ProtectedRoute requireApproved>
-      <CotationContent />
-    </ProtectedRoute>
-  )
+  return <CotationContent />
 }
