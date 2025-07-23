@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
 const QUOTATION_EMAIL = process.env.QUOTATION_EMAIL || 'contact@rdistrib-solutions.fr'
+const RESEND_API_KEY = process.env.RESEND_API_KEY
+
+// Créer l'instance Resend seulement si la clé est disponible
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null
 
 export async function POST(request: NextRequest) {
   try {
@@ -304,18 +307,22 @@ export async function POST(request: NextRequest) {
     </html>
     `
 
-    // Envoyer l'email
-    const { error: emailError } = await resend.emails.send({
-      from: 'R DISTRIB SOLUTIONS <noreply@rdistrib-solutions.fr>',
-      to: QUOTATION_EMAIL,
-      replyTo: data.clientInfo.email,
-      subject: `Nouvelle demande de cotation - ${data.clientInfo.company || data.clientInfo.name}`,
-      html: emailHtml,
-    })
+    // Envoyer l'email si Resend est configuré
+    if (resend) {
+      const { error: emailError } = await resend.emails.send({
+        from: 'R DISTRIB SOLUTIONS <noreply@rdistrib-solutions.fr>',
+        to: QUOTATION_EMAIL,
+        replyTo: data.clientInfo.email,
+        subject: `Nouvelle demande de cotation - ${data.clientInfo.company || data.clientInfo.name}`,
+        html: emailHtml,
+      })
 
-    if (emailError) {
-      console.error('Erreur envoi email:', emailError)
-      throw emailError
+      if (emailError) {
+        console.error('Erreur envoi email:', emailError)
+        throw emailError
+      }
+    } else {
+      console.warn('Resend API key non configurée - email non envoyé')
     }
 
     // Sauvegarder la demande dans la base de données
