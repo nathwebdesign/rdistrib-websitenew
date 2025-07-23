@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { createAccountRequest } from '@/lib/auth'
+// Suppression de l'import createAccountRequest
 
 export default function AccountRequestForm() {
   const [formData, setFormData] = useState({
@@ -26,7 +26,19 @@ export default function AccountRequestForm() {
     setError('')
 
     try {
-      await createAccountRequest(formData)
+      const response = await fetch('/api/account-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Une erreur est survenue')
+      }
+
       setIsSubmitted(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')
