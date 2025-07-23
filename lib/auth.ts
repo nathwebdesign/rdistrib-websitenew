@@ -137,14 +137,27 @@ export async function signOut() {
 
 // Obtenir l'utilisateur actuel
 export async function getCurrentUser() {
-  const { data: { user }, error } = await supabase.auth.getUser()
-  
-  if (error) {
-    console.error('Erreur lors de la récupération de l\'utilisateur:', error)
+  try {
+    // D'abord vérifier s'il y a une session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session) {
+      return null
+    }
+    
+    // Si session existe, récupérer l'utilisateur
+    const { data: { user }, error } = await supabase.auth.getUser()
+    
+    if (error) {
+      console.error('Erreur lors de la récupération de l\'utilisateur:', error)
+      return null
+    }
+
+    return user
+  } catch (error) {
+    console.error('Erreur dans getCurrentUser:', error)
     return null
   }
-
-  return user
 }
 
 // Hook pour écouter les changements d'authentification
