@@ -6,6 +6,8 @@ import { Menu, X } from "lucide-react"
 import { AnimatedButton } from "@/components/ui/animated-button"
 import { Logo } from "@/components/ui/logo"
 import { motion } from "framer-motion"
+import { useAuth } from "@/components/auth/auth-provider"
+import { signOut } from "@/lib/auth"
 
 const navigation = [
   { name: "Accueil", href: "/" },
@@ -16,6 +18,16 @@ const navigation = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user, profile, isAdmin } = useAuth()
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Erreur de déconnexion:', error)
+    }
+  }
 
   return (
     <motion.header 
@@ -84,14 +96,40 @@ export default function Header() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link href="/cotation">
-              <AnimatedButton className="bg-primary text-white hover:bg-primary/90" style={{ backgroundColor: '#2563eb', color: 'white' }}>Obtenir une cotation</AnimatedButton>
-            </Link>
-          </motion.div>
+          {user ? (
+            <div className="flex items-center space-x-4">
+              {isAdmin && (
+                <Link href="/admin" className="text-sm font-medium text-gray-700 hover:text-primary">
+                  Administration
+                </Link>
+              )}
+              <Link href="/dashboard" className="text-sm font-medium text-gray-700 hover:text-primary">
+                {profile?.contact_person || 'Mon compte'}
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="text-sm font-medium text-gray-700 hover:text-primary"
+              >
+                Déconnexion
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <Link href="/auth/login" className="text-sm font-medium text-gray-700 hover:text-primary">
+                Connexion
+              </Link>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link href="/cotation">
+                  <AnimatedButton className="bg-primary text-white hover:bg-primary/90" style={{ backgroundColor: '#2563eb', color: 'white' }}>
+                    Obtenir une cotation
+                  </AnimatedButton>
+                </Link>
+              </motion.div>
+            </div>
+          )}
         </motion.div>
       </nav>
       
@@ -132,6 +170,31 @@ export default function Header() {
                   <Link href="/cotation" className="block">
                     <AnimatedButton className="w-full">Obtenir une cotation</AnimatedButton>
                   </Link>
+                  {user && (
+                    <div className="mt-4 space-y-2">
+                      <Link href="/dashboard" className="block text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-md">
+                        Mon compte
+                      </Link>
+                      {isAdmin && (
+                        <Link href="/admin" className="block text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-md">
+                          Administration
+                        </Link>
+                      )}
+                      <button
+                        onClick={handleSignOut}
+                        className="block w-full text-left text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-md"
+                      >
+                        Déconnexion
+                      </button>
+                    </div>
+                  )}
+                  {!user && (
+                    <div className="mt-4">
+                      <Link href="/auth/login" className="block text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-md">
+                        Connexion
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

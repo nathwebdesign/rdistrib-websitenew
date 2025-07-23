@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import SchemaOrg from "@/components/seo/schema-org";
+import { AuthProvider } from "@/components/auth/auth-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -72,11 +73,13 @@ export default function RootLayout({
         <SchemaOrg />
       </head>
       <body className={`${inter.className} bg-gradient-to-br from-[#285dd8]/60 via-[#285dd8]/50 to-[#285dd8]/70`}>
-        <Header />
-        <main className="min-h-screen pt-20">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main className="min-h-screen pt-20">
+            {children}
+          </main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
