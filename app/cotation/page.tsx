@@ -1,14 +1,18 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { MapPin, Package, Calculator, FileText, Download, Printer, Truck, AlertCircle, Euro, Shield, Clock as ClockIcon, Plus, Trash2, Box } from "lucide-react"
+import { MapPin, Package, Calculator, FileText, Download, Printer, Truck, AlertCircle, Euro, Shield, Clock as ClockIcon, Plus, Trash2, Box, Send } from "lucide-react"
 import dynamic from "next/dynamic"
 import { calculateCotation, estimatePalettes, determineTransportType, getMinimumPriceForPole } from "@/lib/cotation-calculator"
 import { getDepartmentFromPostalCode } from "@/config/zones"
 import { calculateTotalPrice } from "@/config/tarifs-manager"
 import { selectExpressVehicle, calculateExpressPrice, estimateDistance } from "@/config/tarifs-express"
 import { getZoneExpressRP, isVilleExpressRP } from "@/config/zones-express-rp"
+import { useAuth } from "@/components/auth/auth-provider"
+import { useRouter } from "next/navigation"
+import ProtectedRoute from "@/components/auth/protected-route"
+import toast from "react-hot-toast"
 
 const Map = dynamic(() => import("@/components/cotation/map"), { ssr: false })
 const AddressAutocomplete = dynamic(() => import("@/components/cotation/address-autocomplete-free"), { ssr: false })
@@ -20,7 +24,7 @@ const poles: Record<string, [number, number]> = {
   'Le Havre': [49.4944, 0.1079]
 }
 
-export default function CotationPage() {
+function CotationContent() {
   const [articles, setArticles] = useState([{
     id: 1,
     type: 'palette',  // palette, colis, tube
@@ -56,6 +60,100 @@ export default function CotationPage() {
   const [error, setError] = useState<string>('')
   const [showResult, setShowResult] = useState(false)
   const [selectedDelivery, setSelectedDelivery] = useState<'messagerie' | 'affretement' | 'express' | null>(null)
+  const [isSendingRequest, setIsSendingRequest] = useState(false)
+  const { user, profile } = useAuth()
+  const router = useRouter()
+
+  const handleSendRequest = async () => {
+    if (!resultat || !user || !profile) {
+      toast.error("Veuillez vous connecter pour envoyer une demande")
+      router.push('/auth/login')
+      return
+    }
+
+    setIsSendingRequest(true)
+    
+    try {
+      const cotationData = {
+        trajet: resultat.trajet,
+        zone: resultat.zone,
+        pole: resultat.pole,
+        articles: articles.filter(a => a.poids && a.longueur && a.largeur && a.hauteur).map(a => ({
+          type: a.type,
+          poids: parseFloat(a.poids),
+          longueur: parseFloat(a.longueur),
+          largeur: parseFloat(a.largeur),
+          hauteur: parseFloat(a.hauteur),
+          nombrePalettes: parseInt(a.nombrePalettes || '1'),
+          gerbable: a.gerbable
+        })),
+        transport: resultat.transport,
+        pricing: getSelectedPrice(),
+        selectedDelivery: selectedDelivery || 'affretement',
+        options: {
+          hayonEnlevement: formData.hayonEnlevement,
+          hayonLivraison: formData.hayonLivraison,
+          quantiteLimitee: formData.quantiteLimitee,
+          kitADR: formData.kitADR,
+          rendezVousEnlevement: formData.rendezVousEnlevement,
+          rendezVousLivraison: formData.rendezVousLivraison
+        },
+        clientInfo: {
+          name: profile.contact_person || user.email,
+          email: user.email,
+          company: profile.company_name || '',
+          phone: profile.phone || ''
+        }
+      }
+
+      const response = await fetch('/api/cotation/send-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cotationData)
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'envoi de la demande')
+      }
+
+      toast.success('Votre demande a été envoyée avec succès !')
+      
+      // Réinitialiser le formulaire après envoi réussi
+      setFormData({
+        villeDepart: '',
+        villeArrivee: '',
+        poleSelectionne: '',
+        poleArriveeSelectionne: '',
+        codePostalDestination: '',
+        hayonEnlevement: false,
+        hayonLivraison: false,
+        quantiteLimitee: false,
+        kitADR: false,
+        rendezVousEnlevement: false,
+        rendezVousLivraison: false
+      })
+      setArticles([{
+        id: 1,
+        type: 'palette',
+        poids: '',
+        longueur: '',
+        largeur: '',
+        hauteur: '',
+        nombrePalettes: '1',
+        gerbable: true
+      }])
+      setShowResult(false)
+      setSelectedDelivery(null)
+      
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Une erreur est survenue lors de l\'envoi de votre demande')
+    } finally {
+      setIsSendingRequest(false)
+    }
+  }
 
   const addArticle = () => {
     const newId = Math.max(...articles.map(a => a.id)) + 1
@@ -1449,13 +1547,35 @@ export default function CotationPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Télécharger PDF
               </Button>
-              <Button>
-                Demander un devis complet
+              <Button
+                onClick={handleSendRequest}
+                disabled={isSendingRequest}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {isSendingRequest ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Envoi en cours...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Envoyer ma demande
+                  </>
+                )}
               </Button>
             </div>
           </div>
         )}
       </div>
     </div>
+  )
+}
+
+export default function CotationPage() {
+  return (
+    <ProtectedRoute requireApproved>
+      <CotationContent />
+    </ProtectedRoute>
   )
 }
