@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { getSupabaseClient } from './supabase-client'
 import type { UserProfile, AccountRequest } from './supabase'
 
 // Créer une demande de compte
@@ -14,7 +15,9 @@ export async function createAccountRequest(data: {
   message?: string
 }) {
   try {
-    const { data: request, error } = await supabase
+    // Utiliser le client dynamique pour éviter les erreurs de headers
+    const client = getSupabaseClient()
+    const { data: request, error } = await client
       .from('account_requests')
       .insert([data])
       .select()

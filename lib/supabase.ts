@@ -3,10 +3,16 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Créer un client factice si les variables ne sont pas définies (pour le build)
-export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : createClient('https://placeholder.supabase.co', 'placeholder-key')
+// Vérifier que les variables sont définies et valides
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Variables Supabase manquantes. Utilisation de valeurs par défaut.')
+}
+
+// Créer le client avec les bonnes valeurs ou des placeholders pour le build
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
+)
 
 // Types pour TypeScript
 export interface UserProfile {
