@@ -31,9 +31,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         status: 'rejected',
-        rejection_reason: reason,
-        processed_at: new Date().toISOString(),
-        processed_by: authData.email
+        rejection_reason: reason
       })
     })
     

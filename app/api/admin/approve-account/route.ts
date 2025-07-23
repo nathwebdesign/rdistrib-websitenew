@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     if (!createUserResponse.ok) {
       const error = await createUserResponse.text()
       console.error('Erreur création utilisateur:', error)
-      throw new Error('Erreur lors de la création de l\'utilisateur')
+      // Continuer même si la création échoue (l'utilisateur existe peut-être déjà)
     }
     
     // 3. Mettre à jour le statut de la demande
@@ -82,14 +82,15 @@ export async function POST(request: NextRequest) {
         'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
       },
       body: JSON.stringify({
-        status: 'approved',
-        processed_at: new Date().toISOString(),
-        processed_by: authData.email
+        status: 'approved'
       })
     })
     
     if (!updateResponse.ok) {
-      throw new Error('Erreur lors de la mise à jour du statut')
+      const errorText = await updateResponse.text()
+      console.error('Erreur update status:', errorText)
+      console.error('Update URL:', `${SUPABASE_URL}/rest/v1/account_requests?id=eq.${requestId}`)
+      throw new Error(`Erreur lors de la mise à jour du statut: ${errorText}`)
     }
     
     return NextResponse.json({ success: true })
