@@ -47,11 +47,27 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Retourner les données de session
-    return NextResponse.json({
+    // Créer la réponse avec les cookies de session
+    const response = NextResponse.json({
       user: data.user,
-      session: data.session
+      session: data.session,
+      success: true
     })
+    
+    // Ajouter les cookies de session si disponibles
+    if (data.session) {
+      // Définir le cookie d'authentification
+      response.cookies.set({
+        name: 'sb-auth-token',
+        value: data.session.access_token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 jours
+      })
+    }
+    
+    return response
     
   } catch (error) {
     console.error('Erreur API login:', error)

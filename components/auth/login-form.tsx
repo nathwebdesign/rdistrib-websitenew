@@ -35,10 +35,13 @@ export default function LoginForm() {
         throw new Error(data.error || 'Erreur de connexion')
       }
 
-      // Rediriger vers le dashboard
-      router.push('/dashboard')
-      // Recharger pour mettre à jour l'état d'authentification
-      window.location.reload()
+      // Stocker la session dans le localStorage ou cookies si nécessaire
+      if (data.session) {
+        // Forcer la redirection
+        window.location.href = '/dashboard'
+      } else {
+        throw new Error('Pas de session retournée')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de connexion')
     } finally {
