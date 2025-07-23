@@ -17,29 +17,11 @@ export default function AccountRequestsList() {
 
   const loadRequests = async () => {
     try {
-      console.log('Chargement des demandes...')
-      // Utilisons le nouvel endpoint direct
-      const response = await fetch('/api/admin/account-requests-direct')
-      console.log('Response status:', response.status)
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('Erreur réponse:', errorData)
-        throw new Error(errorData.error || 'Erreur lors de la récupération')
-      }
-      
+      const response = await fetch('/api/admin/get-requests')
       const data = await response.json()
-      console.log('Data reçue:', data)
-      console.log('Nombre de demandes:', Array.isArray(data) ? data.length : 0)
-      
-      if (Array.isArray(data)) {
-        setRequests(data)
-      } else {
-        console.error('Les données reçues ne sont pas un tableau:', data)
-        setRequests([])
-      }
+      setRequests(data || [])
     } catch (error) {
-      console.error('Erreur lors du chargement des demandes:', error)
+      console.error('Erreur:', error)
       setRequests([])
     } finally {
       setLoading(false)

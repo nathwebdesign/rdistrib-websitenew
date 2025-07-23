@@ -28,7 +28,7 @@ export default function AccountRequestForm() {
     setError('')
 
     try {
-      const response = await fetch('/api/account-request', {
+      const response = await fetch('/api/account-request-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
