@@ -6,8 +6,7 @@ import { Menu, X } from "lucide-react"
 import { AnimatedButton } from "@/components/ui/animated-button"
 import { Logo } from "@/components/ui/logo"
 import { motion } from "framer-motion"
-import { useAuth } from "@/components/auth/auth-provider"
-import { signOut } from "@/lib/auth"
+import { useSimpleAuth } from "@/components/auth/simple-auth-provider"
 
 const navigation = [
   { name: "Accueil", href: "/" },
@@ -18,15 +17,10 @@ const navigation = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { user, profile, isAdmin } = useAuth()
+  const { user, isAdmin, logout } = useSimpleAuth()
 
-  const handleSignOut = async () => {
-    try {
-      await signOut()
-      window.location.href = '/'
-    } catch (error) {
-      console.error('Erreur de déconnexion:', error)
-    }
+  const handleSignOut = () => {
+    logout()
   }
 
   return (
@@ -104,7 +98,7 @@ export default function Header() {
                 </Link>
               )}
               <Link href="/dashboard" className="text-sm font-medium text-gray-700 hover:text-primary">
-                {profile?.contact_person || 'Mon compte'}
+                {user?.email || 'Mon compte'}
               </Link>
               <button
                 onClick={handleSignOut}

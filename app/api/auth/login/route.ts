@@ -47,33 +47,39 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Créer la réponse avec les cookies de session
+    // Vérifier si c'est un admin
+    let isAdmin = false
+    if (data.user) {
+      const { data: adminData } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .single()
+      
+      isAdmin = !!adminData
+    }
+    
+    // Créer la réponse
     const response = NextResponse.json({
       user: data.user,
       session: data.session,
+      isAdmin,
       success: true
     })
     
-    // Ajouter les cookies de session Supabase
-    if (data.session) {
-      // Cookie pour le token d'accès
+    // Cookie simple avec les infos utilisateur
+    if (data.user) {
       response.cookies.set({
-        name: 'sb-access-token',
-        value: data.session.access_token,
-        httpOnly: true,
+        name: 'rdistrib-auth',
+        value: JSON.stringify({
+          id: data.user.id,
+          email: data.user.email,
+          isAdmin
+        }),
+        httpOnly: false, // Pour que le client puisse le lire
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7 // 7 jours
-      })
-      
-      // Cookie pour le refresh token
-      response.cookies.set({
-        name: 'sb-refresh-token',
-        value: data.session.refresh_token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30 // 30 jours
       })
     }
     

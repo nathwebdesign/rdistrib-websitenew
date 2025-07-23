@@ -2,11 +2,11 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/components/auth/auth-provider"
+import { useSimpleAuth } from "@/components/auth/simple-auth-provider"
 import AccountRequestsList from "@/components/admin/account-requests-list"
 
 export default function AdminPage() {
-  const { user, isAdmin, loading } = useAuth()
+  const { user, isAdmin, loading } = useSimpleAuth()
   const router = useRouter()
 
   useEffect(() => {
