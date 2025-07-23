@@ -460,11 +460,34 @@ export default function CotationPage() {
     let vehiculeExpress = null
     let distanceAllerRetour = null
     
-    // Pour Express RP, utiliser le pricing déjà calculé dans resultatsArticles
-    if (isRegionParisienne && resultatsArticles.length > 0 && resultatsArticles[0].pricing) {
-      // Express RP utilise déjà le bon pricing
-      pricingExpress = resultatsArticles[0].pricing
-      prixExpressTotal = pricingExpress.totalHT
+    // Pour Express RP, recalculer le pricing avec les bonnes options
+    if (isRegionParisienne && resultatsArticles.length > 0) {
+      // Recalculer la cotation Express RP avec les options utilisateur
+      const cotationExpressRP = calculateCotation({
+        poleId,
+        postalCodeDepart: isTrajetInterneIDF ? '95700' : undefined,
+        postalCodeDestination: codePostal,
+        cityNameDestination: formData.villeArrivee,
+        weight: poidsTotal,
+        dimensions: articles[0] ? {
+          longueur: parseFloat(articles[0].longueur || '0'),
+          largeur: parseFloat(articles[0].largeur || '0'),
+          hauteur: parseFloat(articles[0].hauteur || '0')
+        } : { longueur: 0, largeur: 0, hauteur: 0 },
+        options: {
+          hayon: formData.hayonEnlevement || formData.hayonLivraison,
+          attente: 0,
+          matieresDangereuses: formData.kitADR,
+          valeurMarchandise: 0
+        },
+        nombrePalettes: articles.reduce((sum, a) => sum + parseInt(a.nombrePalettes || '1'), 0),
+        destinationCoords: coordinates.arrivee || undefined
+      })
+      
+      if (cotationExpressRP.success && cotationExpressRP.data) {
+        pricingExpress = cotationExpressRP.data.pricing
+        prixExpressTotal = pricingExpress.totalHT
+      }
     } else {
       // Calculer Express standard pour les autres trajets
       // Sélectionner le véhicule approprié en fonction du poids total et des dimensions max
