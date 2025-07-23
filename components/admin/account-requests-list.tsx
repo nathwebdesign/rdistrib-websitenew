@@ -62,8 +62,9 @@ export default function AccountRequestsList() {
         throw new Error(error.error || 'Erreur lors de l\'approbation')
       }
       
-      alert('Compte approuvé avec succès !')
-      await loadRequests() // Recharger la liste
+      // Recharger la liste AVANT d'afficher l'alerte
+      await loadRequests()
+      alert('Compte approuvé avec succès ! L\'utilisateur peut maintenant se connecter.')
     } catch (error) {
       console.error('Erreur lors de l\'approbation:', error)
       alert(error instanceof Error ? error.message : 'Erreur lors de l\'approbation du compte')
@@ -93,10 +94,11 @@ export default function AccountRequestsList() {
         throw new Error(error.error || 'Erreur lors du rejet')
       }
       
-      alert('Demande rejetée')
-      await loadRequests() // Recharger la liste
+      // Recharger la liste et réinitialiser
       setShowRejectModal(null)
       setRejectReason('')
+      await loadRequests()
+      alert('Demande rejetée')
     } catch (error) {
       console.error('Erreur lors du rejet:', error)
       alert(error instanceof Error ? error.message : 'Erreur lors du rejet du compte')

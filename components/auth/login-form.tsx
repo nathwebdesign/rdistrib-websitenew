@@ -22,7 +22,7 @@ export default function LoginForm() {
     setError('')
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/simple-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,24 +36,11 @@ export default function LoginForm() {
         throw new Error(data.error || 'Erreur de connexion')
       }
 
-      // Stocker la session dans le localStorage pour Supabase
-      if (data.session && data.session.access_token) {
-        // Stocker les tokens dans le localStorage comme Supabase le fait
-        localStorage.setItem('sb-ebffmwedzkcuqqqwofrp-auth-token', JSON.stringify({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-          expires_at: data.session.expires_at,
-          expires_in: data.session.expires_in,
-          token_type: data.session.token_type,
-          user: data.user
-        }))
-        
-        // Attendre un peu pour que le storage se propage
-        setTimeout(() => {
-          window.location.href = '/dashboard'
-        }, 100)
+      // Rediriger après la connexion réussie
+      if (data.success) {
+        window.location.href = '/dashboard'
       } else {
-        throw new Error('Pas de session retournée')
+        throw new Error('Erreur de connexion')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de connexion')

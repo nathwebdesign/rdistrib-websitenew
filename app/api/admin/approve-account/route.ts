@@ -93,6 +93,9 @@ export async function POST(request: NextRequest) {
       throw new Error(`Erreur lors de la mise à jour du statut: ${errorText}`)
     }
     
+    const updateResult = await updateResponse.json()
+    console.log('Statut mis à jour:', updateResult)
+    
     return NextResponse.json({ success: true })
     
   } catch (error) {
