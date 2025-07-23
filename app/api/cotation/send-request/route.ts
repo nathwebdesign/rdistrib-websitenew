@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
@@ -8,10 +7,26 @@ const QUOTATION_EMAIL = process.env.QUOTATION_EMAIL || 'contact@rdistrib-solutio
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    // Créer le client Supabase avec les variables d'environnement
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     
-    // Vérifier que l'utilisateur est connecté
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    
+    // Récupérer le token depuis les headers
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
+    
+    const token = authHeader.replace('Bearer ', '')
+    
+    // Vérifier le token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
     if (authError || !user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })

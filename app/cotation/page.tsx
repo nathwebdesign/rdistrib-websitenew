@@ -13,6 +13,7 @@ import { useAuth } from "@/components/auth/auth-provider"
 import { useRouter } from "next/navigation"
 import ProtectedRoute from "@/components/auth/protected-route"
 import toast from "react-hot-toast"
+import { supabase } from "@/lib/supabase"
 
 const Map = dynamic(() => import("@/components/cotation/map"), { ssr: false })
 const AddressAutocomplete = dynamic(() => import("@/components/cotation/address-autocomplete-free"), { ssr: false })
@@ -106,10 +107,14 @@ function CotationContent() {
         }
       }
 
+      // Récupérer le token de session
+      const { data: { session } } = await supabase.auth.getSession()
+      
       const response = await fetch('/api/cotation/send-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`
         },
         body: JSON.stringify(cotationData)
       })
