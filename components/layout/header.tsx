@@ -1,11 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
-import { Menu, X, LogIn, Calculator } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { Menu, X, LogIn, Calculator, User, LogOut, Settings, ShieldCheck } from "lucide-react"
 import { AnimatedButton } from "@/components/ui/animated-button"
 import { Logo } from "@/components/ui/logo"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useSimpleAuth } from "@/components/auth/simple-auth-provider"
 
 const navigation = [
@@ -17,10 +17,24 @@ const navigation = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const { user, isAdmin, logout } = useSimpleAuth()
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleSignOut = () => {
     logout()
+    setUserMenuOpen(false)
   }
 
   return (
@@ -91,21 +105,62 @@ export default function Header() {
           transition={{ delay: 0.4 }}
         >
           {user ? (
-            <div className="flex items-center space-x-4">
-              {isAdmin && (
-                <Link href="/admin" className="text-sm font-medium text-gray-700 hover:text-primary">
-                  Administration
-                </Link>
-              )}
-              <Link href="/dashboard" className="text-sm font-medium text-gray-700 hover:text-primary">
-                {user?.email || 'Mon compte'}
-              </Link>
+            <div className="relative" ref={menuRef}>
               <button
-                onClick={handleSignOut}
-                className="text-sm font-medium text-gray-700 hover:text-primary"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors duration-200"
               >
-                Déconnexion
+                <User className="w-5 h-5 text-primary" />
               </button>
+              
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50"
+                  >
+                    <div className="px-4 py-3 border-b border-gray-200">
+                      <p className="text-sm font-medium text-gray-900">{user?.email}</p>
+                      {isAdmin && (
+                        <p className="text-xs text-primary mt-1">Administrateur</p>
+                      )}
+                    </div>
+                    
+                    <div className="py-1">
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <Settings className="w-4 h-4 mr-3" />
+                        Mon compte
+                      </Link>
+                      
+                      {isAdmin && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <ShieldCheck className="w-4 h-4 mr-3" />
+                          Administration
+                        </Link>
+                      )}
+                      
+                      <button
+                        onClick={handleSignOut}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                      >
+                        <LogOut className="w-4 h-4 mr-3" />
+                        Déconnexion
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ) : (
             <div className="flex items-center gap-4">
@@ -114,19 +169,9 @@ export default function Header() {
                 whileTap={{ scale: 0.95 }}
               >
                 <Link href="/cotation">
-                  <button className="group relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-medium text-white transition duration-300 ease-out bg-gradient-to-r from-primary to-primary/80 rounded-lg shadow-lg hover:shadow-xl">
-                    <span className="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-gradient-to-r from-primary/90 to-primary group-hover:translate-x-0 ease">
-                      <Calculator className="w-5 h-5" />
-                    </span>
-                    <span className="absolute flex items-center justify-center w-full h-full text-white transition-all duration-300 transform group-hover:translate-x-full ease">
-                      <Calculator className="w-5 h-5 mr-2" />
-                      Obtenir une cotation
-                    </span>
-                    <span className="relative invisible flex items-center">
-                      <Calculator className="w-5 h-5 mr-2" />
-                      Obtenir une cotation
-                    </span>
-                  </button>
+                  <AnimatedButton>
+                    Obtenir une cotation
+                  </AnimatedButton>
                 </Link>
               </motion.div>
               <motion.div

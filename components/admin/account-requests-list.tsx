@@ -18,14 +18,29 @@ export default function AccountRequestsList() {
 
   const loadRequests = async () => {
     try {
+      console.log('Chargement des demandes...')
       const response = await fetch('/api/admin/account-requests')
+      console.log('Response status:', response.status)
+      
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Erreur réponse:', errorText)
         throw new Error('Erreur lors de la récupération')
       }
+      
       const data = await response.json()
-      setRequests(data)
+      console.log('Data reçue:', data)
+      setRequests(data || [])
     } catch (error) {
       console.error('Erreur lors du chargement des demandes:', error)
+      // Test avec le endpoint de debug
+      try {
+        const debugResponse = await fetch('/api/debug/account-requests')
+        const debugData = await debugResponse.json()
+        console.log('Debug data:', debugData)
+      } catch (debugError) {
+        console.error('Debug error:', debugError)
+      }
     } finally {
       setLoading(false)
     }
@@ -103,7 +118,7 @@ export default function AccountRequestsList() {
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900">Demandes de création de compte</h2>
         <p className="text-gray-600 text-sm mt-1">
-          {requests.filter(r => r.status === 'pending').length} demande(s) en attente
+          Total: {requests.length} demande(s) | En attente: {requests.filter(r => r.status === 'pending').length}
         </p>
       </div>
 
@@ -190,6 +205,7 @@ export default function AccountRequestsList() {
       {requests.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500">Aucune demande de compte</p>
+          <p className="text-xs text-gray-400 mt-2">Vérifiez la console pour les logs de débogage</p>
         </div>
       )}
 
