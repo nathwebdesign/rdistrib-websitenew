@@ -376,8 +376,9 @@ export default function CotationPage() {
     }, 0)
     
     // Appliquer les options sur le total
+    // Pour le hayon : utiliser uniquement la valeur explicite du formulaire
     const options = {
-      hayon: hayonNecessaire || formData.hayonEnlevement || formData.hayonLivraison,
+      hayon: formData.hayonEnlevement || formData.hayonLivraison,
       attente: 0,
       matieresDangereuses: formData.kitADR, // Kit ADR ajoute 25%
       valeurMarchandise: 0,
@@ -459,32 +460,40 @@ export default function CotationPage() {
     let vehiculeExpress = null
     let distanceAllerRetour = null
     
-    // Sélectionner le véhicule approprié en fonction du poids total et des dimensions max
-    let dimensionsMax = { longueur: 0, largeur: 0, hauteur: 0 }
-    let nombrePalettesTotal = 0
-    articles.forEach(article => {
-      if (article.longueur && article.largeur && article.hauteur) {
-        dimensionsMax.longueur = Math.max(dimensionsMax.longueur, parseFloat(article.longueur))
-        dimensionsMax.largeur = Math.max(dimensionsMax.largeur, parseFloat(article.largeur))
-        dimensionsMax.hauteur = Math.max(dimensionsMax.hauteur, parseFloat(article.hauteur))
-      }
-      if (article.nombrePalettes) {
-        nombrePalettesTotal += parseInt(article.nombrePalettes)
-      }
-    })
-    
-    vehiculeExpress = selectExpressVehicle(poidsTotal, dimensionsMax, nombrePalettesTotal)
-    
-    if (vehiculeExpress && coordinates.depart && coordinates.arrivee) {
-      distanceAllerRetour = estimateDistance(coordinates.depart, coordinates.arrivee)
-      const prixExpress = calculateExpressPrice(distanceAllerRetour, vehiculeExpress, {
-        hayon: formData.hayonEnlevement || formData.hayonLivraison,
-        matieresDangereuses: formData.kitADR, // Kit ADR ajoute 25%
-        rendezVous: formData.rendezVousEnlevement || formData.rendezVousLivraison,
-        villeDestination: formData.villeArrivee // Passer le nom de la ville pour les zones A/B/C/D
+    // Pour Express RP, utiliser le pricing déjà calculé dans resultatsArticles
+    if (isRegionParisienne && resultatsArticles.length > 0 && resultatsArticles[0].pricing) {
+      // Express RP utilise déjà le bon pricing
+      pricingExpress = resultatsArticles[0].pricing
+      prixExpressTotal = pricingExpress.totalHT
+    } else {
+      // Calculer Express standard pour les autres trajets
+      // Sélectionner le véhicule approprié en fonction du poids total et des dimensions max
+      let dimensionsMax = { longueur: 0, largeur: 0, hauteur: 0 }
+      let nombrePalettesTotal = 0
+      articles.forEach(article => {
+        if (article.longueur && article.largeur && article.hauteur) {
+          dimensionsMax.longueur = Math.max(dimensionsMax.longueur, parseFloat(article.longueur))
+          dimensionsMax.largeur = Math.max(dimensionsMax.largeur, parseFloat(article.largeur))
+          dimensionsMax.hauteur = Math.max(dimensionsMax.hauteur, parseFloat(article.hauteur))
+        }
+        if (article.nombrePalettes) {
+          nombrePalettesTotal += parseInt(article.nombrePalettes)
+        }
       })
-      prixExpressTotal = prixExpress.totalHT
-      pricingExpress = prixExpress
+      
+      vehiculeExpress = selectExpressVehicle(poidsTotal, dimensionsMax, nombrePalettesTotal)
+      
+      if (vehiculeExpress && coordinates.depart && coordinates.arrivee) {
+        distanceAllerRetour = estimateDistance(coordinates.depart, coordinates.arrivee)
+        const prixExpress = calculateExpressPrice(distanceAllerRetour, vehiculeExpress, {
+          hayon: formData.hayonEnlevement || formData.hayonLivraison,
+          matieresDangereuses: formData.kitADR, // Kit ADR ajoute 25%
+          rendezVous: formData.rendezVousEnlevement || formData.rendezVousLivraison,
+          villeDestination: formData.villeArrivee // Passer le nom de la ville pour les zones A/B/C/D
+        })
+        prixExpressTotal = prixExpress.totalHT
+        pricingExpress = prixExpress
+      }
     }
     
     // Calculer aussi le pricing pour la messagerie si disponible
@@ -525,7 +534,7 @@ export default function CotationPage() {
         },
         express: {
           disponible: vehiculeExpress !== null || isRegionParisienne,
-          prix: isRegionParisienne ? pricing.totalHT : prixExpressTotal,
+          prix: prixExpressTotal,
           vehicule: isRegionParisienne 
             ? resultatsArticles[0]?.transport?.vehicleType
             : vehiculeExpress?.nom,
