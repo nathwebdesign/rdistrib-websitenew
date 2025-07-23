@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { signIn } from '@/lib/auth'
+// Suppression de l'import signIn
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -21,8 +21,24 @@ export default function LoginForm() {
     setError('')
 
     try {
-      await signIn(formData.email, formData.password)
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur de connexion')
+      }
+
+      // Rediriger vers le dashboard
       router.push('/dashboard')
+      // Recharger pour mettre à jour l'état d'authentification
+      window.location.reload()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de connexion')
     } finally {

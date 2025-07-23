@@ -109,16 +109,23 @@ export async function rejectAccountRequest(requestId: string, adminId: string, r
 
 // Connexion utilisateur
 export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  })
+  try {
+    // Utiliser le client dynamique
+    const client = getSupabaseClient()
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password
+    })
 
-  if (error) {
-    throw new Error(`Erreur de connexion: ${error.message}`)
+    if (error) {
+      throw new Error(`Erreur de connexion: ${error.message}`)
+    }
+
+    return data
+  } catch (err) {
+    console.error('Erreur signIn:', err)
+    throw new Error('Erreur de connexion')
   }
-
-  return data
 }
 
 // Déconnexion
