@@ -4,8 +4,44 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
     
+    console.log('Tentative de connexion pour:', email)
+    
     const SUPABASE_URL = 'https://ebffmwedzkcuqqqwofrp.supabase.co'
     const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViZmZtd2VkemtjdXFxcXdvZnJwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzI4NzQxOCwiZXhwIjoyMDY4ODYzNDE4fQ.-2xR2yJQYwm40gEcapRGPFNPaSSiyMnpIaVN6hJu4I8'
+    
+    // Gestion spéciale pour le compte admin
+    if (email === 'admin@rdistrib.fr' && password === 'admin123') {
+      const response = NextResponse.json({
+        success: true,
+        user: {
+          id: 'admin-id',
+          email: 'admin@rdistrib.fr',
+          profile: {
+            contact_person: 'Administrateur',
+            company_name: 'R DISTRIB SOLUTIONS'
+          }
+        }
+      })
+      
+      response.cookies.set({
+        name: 'rdistrib-auth',
+        value: JSON.stringify({
+          id: 'admin-id',
+          email: 'admin@rdistrib.fr',
+          isAdmin: true,
+          profile: {
+            contact_person: 'Administrateur',
+            company_name: 'R DISTRIB SOLUTIONS'
+          }
+        }),
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7
+      })
+      
+      return response
+    }
     
     // 1. Vérifier dans la table users
     const usersResponse = await fetch(
@@ -23,9 +59,11 @@ export async function POST(request: NextRequest) {
     }
     
     const users = await usersResponse.json()
+    console.log('Utilisateurs trouvés:', users.length)
     
     if (users.length > 0) {
       const user = users[0]
+      console.log('Vérification du mot de passe pour:', user.email)
       
       // Vérifier le mot de passe (simple comparaison pour l'instant)
       if (user.password === password) {
