@@ -54,16 +54,26 @@ export async function POST(request: NextRequest) {
       success: true
     })
     
-    // Ajouter les cookies de session si disponibles
+    // Ajouter les cookies de session Supabase
     if (data.session) {
-      // Définir le cookie d'authentification
+      // Cookie pour le token d'accès
       response.cookies.set({
-        name: 'sb-auth-token',
+        name: 'sb-access-token',
         value: data.session.access_token,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7 // 7 jours
+      })
+      
+      // Cookie pour le refresh token
+      response.cookies.set({
+        name: 'sb-refresh-token',
+        value: data.session.refresh_token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30 // 30 jours
       })
     }
     

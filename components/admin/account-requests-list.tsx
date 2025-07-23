@@ -18,7 +18,11 @@ export default function AccountRequestsList() {
 
   const loadRequests = async () => {
     try {
-      const data = await getAccountRequests()
+      const response = await fetch('/api/admin/account-requests')
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération')
+      }
+      const data = await response.json()
       setRequests(data)
     } catch (error) {
       console.error('Erreur lors du chargement des demandes:', error)
