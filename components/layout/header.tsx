@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, LogIn, Calculator } from "lucide-react"
 import { AnimatedButton } from "@/components/ui/animated-button"
 import { Logo } from "@/components/ui/logo"
 import { motion } from "framer-motion"
@@ -108,18 +108,45 @@ export default function Header() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center space-x-4">
-              <Link href="/auth/login" className="text-sm font-medium text-gray-700 hover:text-primary">
-                Connexion
-              </Link>
+            <div className="flex items-center gap-4">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Link href="/cotation">
-                  <AnimatedButton className="bg-primary text-white hover:bg-primary/90" style={{ backgroundColor: '#2563eb', color: 'white' }}>
-                    Obtenir une cotation
-                  </AnimatedButton>
+                  <button className="group relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-medium text-white transition duration-300 ease-out bg-gradient-to-r from-primary to-primary/80 rounded-lg shadow-lg hover:shadow-xl">
+                    <span className="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-gradient-to-r from-primary/90 to-primary group-hover:translate-x-0 ease">
+                      <Calculator className="w-5 h-5" />
+                    </span>
+                    <span className="absolute flex items-center justify-center w-full h-full text-white transition-all duration-300 transform group-hover:translate-x-full ease">
+                      <Calculator className="w-5 h-5 mr-2" />
+                      Obtenir une cotation
+                    </span>
+                    <span className="relative invisible flex items-center">
+                      <Calculator className="w-5 h-5 mr-2" />
+                      Obtenir une cotation
+                    </span>
+                  </button>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link href="/auth/login">
+                  <button className="group relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-medium transition duration-300 ease-out border-2 border-primary rounded-lg hover:bg-primary">
+                    <span className="absolute inset-0 flex items-center justify-center w-full h-full text-primary duration-300 -translate-x-full group-hover:translate-x-0 group-hover:text-white ease">
+                      <LogIn className="w-5 h-5" />
+                    </span>
+                    <span className="absolute flex items-center justify-center w-full h-full text-primary transition-all duration-300 transform group-hover:translate-x-full group-hover:text-white ease">
+                      <LogIn className="w-5 h-5 mr-2" />
+                      Connexion
+                    </span>
+                    <span className="relative invisible flex items-center">
+                      <LogIn className="w-5 h-5 mr-2" />
+                      Connexion
+                    </span>
+                  </button>
                 </Link>
               </motion.div>
             </div>

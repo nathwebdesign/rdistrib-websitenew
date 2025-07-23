@@ -1,21 +1,40 @@
 "use client"
 
-import ProtectedRoute from "@/components/auth/protected-route"
-import { useAuth } from "@/components/auth/auth-provider"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSimpleAuth } from "@/components/auth/simple-auth-provider"
 
 export default function DashboardPage() {
-  const { user, profile } = useAuth()
+  const { user, loading } = useSimpleAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/login')
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
 
   return (
-    <ProtectedRoute requireApproved>
-      <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-12">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">
               Tableau de bord
             </h1>
             <p className="text-gray-600 mt-2">
-              Bienvenue {profile?.contact_person} !
+              Bienvenue {user?.email} !
             </p>
           </div>
           
@@ -61,6 +80,5 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
   )
 }

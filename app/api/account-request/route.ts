@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
     // S'assurer que tous les champs requis sont présents
     const requestData = {
       email: data.email || '',
+      password: data.password || '', // Ajout du mot de passe
       contact_person: data.contact_person || '',
       company_name: data.company_name || null,
       phone: data.phone || null,

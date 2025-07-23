@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 export default function AccountRequestForm() {
   const [formData, setFormData] = useState({
     email: '',
+    password: '',
     company_name: '',
     contact_person: '',
     phone: '',
@@ -125,6 +126,26 @@ export default function AccountRequestForm() {
         </div>
 
         <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            Mot de passe *
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            minLength={8}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="Minimum 8 caractères"
+          />
+          <p className="mt-1 text-sm text-gray-500">
+            Ce mot de passe sera utilisé pour vous connecter une fois votre compte approuvé
+          </p>
+        </div>
+
+        <div>
           <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 mb-2">
             Nom de l'entreprise
           </label>
@@ -234,14 +255,31 @@ export default function AccountRequestForm() {
           </p>
         </div>
 
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full"
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          {isSubmitting ? 'Envoi en cours...' : 'Envoyer la demande'}
-        </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-3 text-base font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            {isSubmitting ? (
+              <span className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Envoi en cours...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center">
+                <UserPlus className="w-5 h-5 mr-2" />
+                Envoyer la demande
+              </span>
+            )}
+          </Button>
+        </motion.div>
       </form>
-    </div>
+        </div>
+      </div>
+    </motion.div>
   )
 }
