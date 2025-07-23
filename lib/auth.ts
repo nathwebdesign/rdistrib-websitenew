@@ -1,18 +1,5 @@
 import { supabase } from './supabase'
-import { createClient } from '@supabase/supabase-js'
 import type { UserProfile, AccountRequest } from './supabase'
-
-// Créer un client public pour les opérations non authentifiées
-const publicSupabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key',
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    }
-  }
-)
 
 // Créer une demande de compte
 export async function createAccountRequest(data: {
@@ -26,20 +13,25 @@ export async function createAccountRequest(data: {
   siret?: string
   message?: string
 }) {
-  const { data: request, error } = await publicSupabase
-    .from('account_requests')
-    .insert([data])
-    .select()
-    .single()
+  try {
+    const { data: request, error } = await supabase
+      .from('account_requests')
+      .insert([data])
+      .select()
+      .single()
 
-  if (error) {
-    if (error.code === '23505') {
-      throw new Error('Un compte avec cet email existe déjà')
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error('Un compte avec cet email existe déjà')
+      }
+      throw new Error(`Erreur lors de la création de la demande: ${error.message}`)
     }
-    throw new Error(`Erreur lors de la création de la demande: ${error.message}`)
-  }
 
-  return request
+    return request
+  } catch (err) {
+    console.error('Erreur dans createAccountRequest:', err)
+    throw new Error('Erreur lors de la création de la demande')
+  }
 }
 
 // Vérifier si un utilisateur est admin
