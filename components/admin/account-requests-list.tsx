@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { getAccountRequests, approveAccountRequest, rejectAccountRequest, getCurrentUser } from '@/lib/auth'
 import type { AccountRequest } from '@/lib/supabase'
 
 export default function AccountRequestsList() {
@@ -50,14 +49,24 @@ export default function AccountRequestsList() {
   const handleApprove = async (requestId: string) => {
     setProcessingId(requestId)
     try {
-      const user = await getCurrentUser()
-      if (!user) throw new Error('Utilisateur non connecté')
+      const response = await fetch('/api/admin/approve-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requestId }),
+      })
       
-      await approveAccountRequest(requestId, user.id)
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Erreur lors de l\'approbation')
+      }
+      
+      alert('Compte approuvé avec succès !')
       await loadRequests() // Recharger la liste
     } catch (error) {
       console.error('Erreur lors de l\'approbation:', error)
-      alert('Erreur lors de l\'approbation du compte')
+      alert(error instanceof Error ? error.message : 'Erreur lors de l\'approbation du compte')
     } finally {
       setProcessingId(null)
     }
@@ -71,16 +80,26 @@ export default function AccountRequestsList() {
 
     setProcessingId(requestId)
     try {
-      const user = await getCurrentUser()
-      if (!user) throw new Error('Utilisateur non connecté')
+      const response = await fetch('/api/admin/reject-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requestId, reason: rejectReason }),
+      })
       
-      await rejectAccountRequest(requestId, user.id, rejectReason)
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Erreur lors du rejet')
+      }
+      
+      alert('Demande rejetée')
       await loadRequests() // Recharger la liste
       setShowRejectModal(null)
       setRejectReason('')
     } catch (error) {
       console.error('Erreur lors du rejet:', error)
-      alert('Erreur lors du rejet du compte')
+      alert(error instanceof Error ? error.message : 'Erreur lors du rejet du compte')
     } finally {
       setProcessingId(null)
     }
