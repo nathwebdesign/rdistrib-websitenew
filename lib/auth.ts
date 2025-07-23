@@ -48,20 +48,30 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
   return !error && !!data
 }
 
-// Obtenir le profil utilisateur
-export async function getUserProfile(userId: string): Promise<UserProfile | null> {
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
+// Obtenir le profil utilisateur depuis account_requests
+export async function getUserProfile(userId: string): Promise<any> {
+  try {
+    // D'abord récupérer l'email de l'utilisateur
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+    
+    // Chercher dans account_requests avec l'email
+    const { data, error } = await supabase
+      .from('account_requests')
+      .select('*')
+      .eq('email', user.email)
+      .single()
 
-  if (error) {
-    console.error('Erreur lors de la récupération du profil:', error)
+    if (error) {
+      console.error('Erreur lors de la récupération du profil:', error)
+      return null
+    }
+
+    return data
+  } catch (error) {
+    console.error('Erreur getUserProfile:', error)
     return null
   }
-
-  return data
 }
 
 // Obtenir toutes les demandes de compte (admin seulement)

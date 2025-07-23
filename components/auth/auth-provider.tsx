@@ -40,19 +40,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Vérifier l'utilisateur actuel au chargement
-    getCurrentUser().then(async (currentUser) => {
-      setUser(currentUser)
-      if (currentUser) {
-        await refreshProfile()
+    const checkUser = async () => {
+      try {
+        const currentUser = await getCurrentUser()
+        setUser(currentUser)
+        if (currentUser) {
+          const userProfile = await getUserProfile(currentUser.id)
+          const adminStatus = await isUserAdmin(currentUser.id)
+          setProfile(userProfile)
+          setIsAdmin(adminStatus)
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification de l\'utilisateur:', error)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
-    })
+    }
+    
+    checkUser()
 
     // Écouter les changements d'authentification
-    const { data: { subscription } } = onAuthStateChange(async (user) => {
-      setUser(user)
-      if (user) {
-        await refreshProfile()
+    const { data: { subscription } } = onAuthStateChange(async (newUser) => {
+      setUser(newUser)
+      if (newUser) {
+        const userProfile = await getUserProfile(newUser.id)
+        const adminStatus = await isUserAdmin(newUser.id)
+        setProfile(userProfile)
+        setIsAdmin(adminStatus)
       } else {
         setProfile(null)
         setIsAdmin(false)
@@ -61,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => subscription.unsubscribe()
-  }, [user])
+  }, [])
 
   return (
     <AuthContext.Provider value={{ user, profile, isAdmin, loading, refreshProfile }}>
