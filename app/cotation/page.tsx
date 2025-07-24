@@ -353,42 +353,23 @@ function CotationContent() {
         }
 
         // Créer une clé unique pour regrouper les articles identiques
-        // Pour les palettes, on regroupe par type de palette (80x120 ou 100x120)
+        // Pour les palettes, on regroupe TOUS les articles de type palette ensemble
+        // peu importe leurs dimensions exactes (on prend la plus grande dimension)
         let key = ''
         if (article.type === 'palette') {
-          // Déterminer le type de palette basé sur les dimensions
-          const estPalette80x120 = (dimensions.longueur === 80 && dimensions.largeur === 120) || 
-                                   (dimensions.longueur === 120 && dimensions.largeur === 80)
-          const estPalette100x120 = (dimensions.longueur === 100 && dimensions.largeur === 120) || 
-                                    (dimensions.longueur === 120 && dimensions.largeur === 100)
-          
-          if (estPalette80x120) {
-            key = 'palette-80x120'
-          } else if (estPalette100x120) {
-            key = 'palette-100x120'
-          } else {
-            // Palette de dimension non standard
-            key = `palette-${dimensions.longueur}x${dimensions.largeur}`
-          }
+          // Toutes les palettes dans le même groupe pour calculer le prix affrètement global
+          key = 'toutes-palettes-affretement'
         } else {
           // Pour les autres types, on garde le regroupement par dimensions exactes
           key = `${article.type}-${dimensions.longueur}x${dimensions.largeur}x${dimensions.hauteur}`
         }
         
         if (!articlesGroupes[key]) {
-          // Pour les palettes standards, utiliser les dimensions standards
-          let groupDimensions = dimensions
-          if (key === 'palette-80x120') {
-            groupDimensions = { longueur: 120, largeur: 80, hauteur: dimensions.hauteur }
-          } else if (key === 'palette-100x120') {
-            groupDimensions = { longueur: 120, largeur: 100, hauteur: dimensions.hauteur }
-          }
-          
           articlesGroupes[key] = {
             articles: [],
             totalPoids: 0,
             totalPalettes: 0,
-            dimensions: groupDimensions
+            dimensions: dimensions
           }
         }
         
@@ -396,15 +377,19 @@ function CotationContent() {
         groupe.articles.push(article)
         groupe.totalPoids += weight * quantity
         
+        // Pour les palettes, mettre à jour les dimensions pour prendre les plus grandes
+        if (article.type === 'palette' && key === 'toutes-palettes-affretement') {
+          groupe.dimensions.longueur = Math.max(groupe.dimensions.longueur, dimensions.longueur)
+          groupe.dimensions.largeur = Math.max(groupe.dimensions.largeur, dimensions.largeur)
+          groupe.dimensions.hauteur = Math.max(groupe.dimensions.hauteur, dimensions.hauteur)
+        }
+        
         if (article.type === 'palette') {
           // Si nombre de palettes spécifié, l'utiliser, sinon compter 1
           let nbPalettes = article.nombrePalettes ? parseInt(article.nombrePalettes) : 1
           
-          // Si gerbable, diviser par 2 (arrondi au supérieur)
-          if (article.gerbable) {
-            nbPalettes = Math.ceil(nbPalettes / 2)
-          }
-          
+          // NE PAS diviser par 2 si gerbable ici, car on veut le nombre total de palettes
+          // La gerbabilité sera gérée dans le calcul du prix
           groupe.totalPalettes += nbPalettes
         } else if (article.type === 'colis') {
           // Pour les colis, utiliser le nombre spécifié
@@ -415,8 +400,14 @@ function CotationContent() {
     })
 
     // Calculer une seule cotation pour chaque groupe
+    console.log('Groupes d\'articles:', articlesGroupes)
     let numeroArticle = 1
     for (const [key, groupe] of Object.entries(articlesGroupes)) {
+      console.log(`Calcul pour groupe ${key}:`, {
+        totalPalettes: groupe.totalPalettes,
+        totalPoids: groupe.totalPoids,
+        articles: groupe.articles.length
+      })
       const options = {
         hayon: false, // On appliquera le hayon sur le total
         attente: 0,
