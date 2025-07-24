@@ -226,40 +226,46 @@ export function isExpressRP(departurePostalCode: string, destinationPostalCode: 
 }
 
 // Fonction pour sélectionner le véhicule approprié
-export function selectExpressRPVehicle(weight: number, volume: number, nombrePalettes?: number): string {
+export function selectExpressRPVehicle(weight: number, volume: number, nombrePalettes?: number, hauteurMax?: number): string {
   // Volume en m³
   const volumeM3 = volume / 1000000;
+  // Hauteur max en cm (si fournie)
+  const hauteur = hauteurMax || 0;
   
   console.log('Sélection véhicule Express RP:', {
     weight,
     volumeM3,
     volume,
-    nombrePalettes
+    nombrePalettes,
+    hauteurMax
   });
   
-  // Critères de sélection basés sur la grille officielle
-  // Break: 1 palette 80x120x100, 350 kg max
-  if (weight <= 350 && (nombrePalettes === undefined || nombrePalettes <= 1)) {
+  // Nombre de palettes (défaut à 1 si non spécifié)
+  const nbPalettes = nombrePalettes || 1;
+  
+  // Sélection stricte selon la grille avec les dimensions spécifiques
+  // Break: 1 palette 80x120x100 max, poids max 350kg
+  if (nbPalettes <= 1 && hauteur <= 100 && weight <= 350) {
     console.log('-> Break sélectionné');
     return 'Break';
-  } 
-  // Fourgon: 3 palettes 80x120x160, 1200 kg max
-  else if (weight <= 1200 && (nombrePalettes === undefined || nombrePalettes <= 3)) {
+  }
+  // Fourgon: 3 palettes 80x120x160 max, poids max 1200kg
+  else if (nbPalettes <= 3 && hauteur <= 160 && weight <= 1200) {
     console.log('-> Fourgon sélectionné');
     return 'Fourgon';
-  } 
-  // GV 20m³: 7 palettes 80x120x200, 800 kg max (attention: c'est moins que le fourgon en poids!)
-  else if ((nombrePalettes !== undefined && nombrePalettes <= 7 && nombrePalettes > 3) || 
-           (volumeM3 <= 20 && weight <= 3000)) {
+  }
+  // GV 20m³: 7 palettes 80x120x200 max, poids max 800kg (attention: limite poids inférieure au fourgon)
+  else if (nbPalettes <= 7 && hauteur <= 200 && weight <= 800) {
     console.log('-> GV 20m³ sélectionné');
     return 'GV 20m³';
-  } 
-  // Porteur: 18 palettes 80x120x220, 10000 kg max
-  else if (weight <= 10000 && (nombrePalettes === undefined || nombrePalettes <= 18)) {
+  }
+  // Si le poids dépasse 800kg mais qu'on a moins de 7 palettes, on passe au Porteur
+  // Porteur: 18 palettes 80x120x220 max, poids max 10000kg
+  else if (nbPalettes <= 18 && hauteur <= 220 && weight <= 10000) {
     console.log('-> Porteur sélectionné');
     return 'Porteur';
-  } 
-  // Semi: 33 palettes 80x120x240, 24000 kg max
+  }
+  // Semi: 33 palettes 80x120x240 max, poids max 24000kg
   else {
     console.log('-> Semi sélectionné');
     return 'Semi';
