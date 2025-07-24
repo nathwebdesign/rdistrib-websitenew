@@ -388,8 +388,16 @@ function CotationContent() {
           // Si nombre de palettes spécifié, l'utiliser, sinon compter 1
           let nbPalettes = article.nombrePalettes ? parseInt(article.nombrePalettes) : 1
           
-          // NE PAS diviser par 2 si gerbable ici, car on veut le nombre total de palettes
-          // La gerbabilité sera gérée dans le calcul du prix
+          // Vérifier si le gerbage est possible (hauteur max camion = 240 cm)
+          if (article.gerbable) {
+            const hauteurGerbee = dimensions.hauteur * 2
+            if (hauteurGerbee > 240) {
+              // Gerbage impossible, avertir l'utilisateur
+              setError(`Attention : La palette ${article.id} ne peut pas être gerbée car la hauteur totale (${hauteurGerbee} cm) dépasserait la hauteur maximale du camion (240 cm). Le calcul sera fait sans gerbage.`)
+              article.gerbable = false // Désactiver le gerbage pour ce calcul
+            }
+          }
+          
           groupe.totalPalettes += nbPalettes
         } else if (article.type === 'colis') {
           // Pour les colis, utiliser le nombre spécifié
@@ -924,7 +932,10 @@ function CotationContent() {
                       
                       {/* Option gerbable */}
                       <div className="mt-2">
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">📚 Gerbable</label>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
+                          📚 Gerbable 
+                          <span className="text-gray-500 font-normal">(empilable - hauteur max camion: 240 cm)</span>
+                        </label>
                         <div className="flex gap-2">
                           <button
                             type="button"
@@ -949,6 +960,18 @@ function CotationContent() {
                             Non
                           </button>
                         </div>
+                        {article.gerbable && article.hauteur && parseFloat(article.hauteur) > 120 && (
+                          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+                            <p className="text-xs text-yellow-800 flex items-start">
+                              <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0 mt-0.5" />
+                              <span>
+                                Hauteur palette : {article.hauteur} cm. 
+                                Vérifiez que 2 palettes gerbées ({parseFloat(article.hauteur) * 2} cm) 
+                                ne dépassent pas 240 cm (hauteur camion).
+                              </span>
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
