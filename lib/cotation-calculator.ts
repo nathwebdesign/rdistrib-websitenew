@@ -662,6 +662,14 @@ function calculateExpressRPCotation(input: CotationInput, departurePostalCode: s
     // Sélectionner le véhicule approprié
     const vehicle = selectExpressRPVehicle(input.weight, volumeCm3);
     
+    console.log('Express RP - Calcul pour:', {
+      ville: input.cityNameDestination,
+      zone: expressZone,
+      vehicule: vehicle,
+      poids: input.weight,
+      volume: volumeCm3
+    });
+    
     // Calculer le prix Express RP
     const pricing = calculateExpressRPPrice(vehicle, expressZone, {
       attente: input.options.attente,

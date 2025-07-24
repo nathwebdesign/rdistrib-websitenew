@@ -26,10 +26,10 @@ export const tarifsExpressRP: TarifExpressRP[] = [
   {
     vehicle: 'Fourgon',
     prices: {
-      A: 70,
-      B: 80,
-      C: 100,
-      D: 120
+      A: 50,  // Corrigé de 70 à 50
+      B: 70,  // Corrigé de 80 à 70
+      C: 90,  // Corrigé de 100 à 90
+      D: 110  // Corrigé de 120 à 110
     }
   },
   {
@@ -230,16 +230,27 @@ export function selectExpressRPVehicle(weight: number, volume: number): string {
   // Volume en m³
   const volumeM3 = volume / 1000000;
   
+  console.log('Sélection véhicule Express RP:', {
+    weight,
+    volumeM3,
+    volume
+  });
+  
   // Critères de sélection basés sur le poids et le volume
   if (weight <= 500 && volumeM3 <= 5) {
+    console.log('-> Break sélectionné');
     return 'Break';
   } else if (weight <= 1000 && volumeM3 <= 10) {
+    console.log('-> Fourgon sélectionné');
     return 'Fourgon';
   } else if (weight <= 3000 && volumeM3 <= 20) {
+    console.log('-> GV 20m³ sélectionné');
     return 'GV 20m³';
   } else if (weight <= 10000 && volumeM3 <= 40) {
+    console.log('-> Porteur sélectionné');
     return 'Porteur';
   } else {
+    console.log('-> Semi sélectionné');
     return 'Semi';
   }
 }
