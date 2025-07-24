@@ -26,10 +26,10 @@ export const tarifsExpressRP: TarifExpressRP[] = [
   {
     vehicle: 'Fourgon',
     prices: {
-      A: 50,  // Corrigé de 70 à 50
-      B: 70,  // Corrigé de 80 à 70
-      C: 90,  // Corrigé de 100 à 90
-      D: 110  // Corrigé de 120 à 110
+      A: 70,  // CORRECT selon grille
+      B: 80,  // CORRECT selon grille
+      C: 100, // CORRECT selon grille
+      D: 120  // CORRECT selon grille
     }
   },
   {
@@ -226,30 +226,41 @@ export function isExpressRP(departurePostalCode: string, destinationPostalCode: 
 }
 
 // Fonction pour sélectionner le véhicule approprié
-export function selectExpressRPVehicle(weight: number, volume: number): string {
+export function selectExpressRPVehicle(weight: number, volume: number, nombrePalettes?: number): string {
   // Volume en m³
   const volumeM3 = volume / 1000000;
   
   console.log('Sélection véhicule Express RP:', {
     weight,
     volumeM3,
-    volume
+    volume,
+    nombrePalettes
   });
   
-  // Critères de sélection basés sur le poids et le volume
-  if (weight <= 500 && volumeM3 <= 5) {
+  // Critères de sélection basés sur la grille officielle
+  // Break: 1 palette 80x120x100, 350 kg max
+  if (weight <= 350 && (nombrePalettes === undefined || nombrePalettes <= 1)) {
     console.log('-> Break sélectionné');
     return 'Break';
-  } else if (weight <= 1000 && volumeM3 <= 10) {
+  } 
+  // Fourgon: 3 palettes 80x120x160, 1200 kg max
+  else if (weight <= 1200 && (nombrePalettes === undefined || nombrePalettes <= 3)) {
     console.log('-> Fourgon sélectionné');
     return 'Fourgon';
-  } else if (weight <= 3000 && volumeM3 <= 20) {
+  } 
+  // GV 20m³: 7 palettes 80x120x200, 800 kg max (attention: c'est moins que le fourgon en poids!)
+  else if ((nombrePalettes !== undefined && nombrePalettes <= 7 && nombrePalettes > 3) || 
+           (volumeM3 <= 20 && weight <= 3000)) {
     console.log('-> GV 20m³ sélectionné');
     return 'GV 20m³';
-  } else if (weight <= 10000 && volumeM3 <= 40) {
+  } 
+  // Porteur: 18 palettes 80x120x220, 10000 kg max
+  else if (weight <= 10000 && (nombrePalettes === undefined || nombrePalettes <= 18)) {
     console.log('-> Porteur sélectionné');
     return 'Porteur';
-  } else {
+  } 
+  // Semi: 33 palettes 80x120x240, 24000 kg max
+  else {
     console.log('-> Semi sélectionné');
     return 'Semi';
   }
